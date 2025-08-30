@@ -145,7 +145,7 @@ The client decodes `MessageScheme` first, inspects the `route`, then accesses th
 
 ### Awareness Notification over WebSocket
 
-```
+```proto
 def handle_cast({:fan_out_to_children, {owner_device_id, eid, awareness}}, state) do
   // Build the AwarenessNotification struct
   notification = %Dartmessaging.AwarenessNotification{
@@ -175,7 +175,7 @@ end
 
 ### Client Decoding
 
-```
+```proto
 message = Dartmessaging.MessageScheme.decode(binary)
 
 case message.payload do
