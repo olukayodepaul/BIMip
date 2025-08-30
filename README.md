@@ -196,26 +196,27 @@ AwarenessResponse {
 ### Ping Request
 
 ```java
-PingPong {
-  "from": "alice@domain.com/phone",
-  "to": "bob@domain.com/laptop",
-  "type": "REQUEST",
-  "status": "UNKNOWN",
-  "request_time": 1693405000
+// PingPong message for connection health
+message PingPong {
+  string from = 1;          // Sender entity (EID)
+  string to = 2;            // Recipient entity (EID)
+  PingType type = 3;        // 1 = Request, 2 = Response
+  PingStatus status = 4;    // 0 = Unknown, 1 = Success, 2 = Fail
+  int64 request_time = 5;   // Unix UTC timestamp of request (ms)
+  int64 response_time = 6;  // Unix UTC timestamp of response (ms)
 }
 
-```
+// Ping type: request or response
+enum PingType {
+  REQUEST = 1;
+  RESPONSE = 2;
+}
 
-### Ping Response
-
-```java
-PingPong {
-  "from": "bob@domain.com/laptop",
-  "to": "alice@domain.com/phone",
-  "type": "RESPONSE",
-  "status": "SUCCESS",
-  "request_time": 1693405000,
-  "response_time": 1693405005
+// Optional status
+enum PingStatus {
+  UNKNOWN = 0;
+  SUCCESS = 1;
+  FAIL = 2;
 }
 
 ```
