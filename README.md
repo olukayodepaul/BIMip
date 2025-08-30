@@ -7,212 +7,239 @@
 
 ---
 
+## Table of Contents
+
+1. Introduction
+2. Terminology
+3. Message Types
+   - 3.1 Awareness Messages
+   - 3.2 PingPong Messages
+4. Protocol Buffers Definitions
+   - 4.1 Awareness
+   - 4.2 PingPong
+5. Semantics
+   - 5.1 Awareness
+   - 5.2 PingPong
+6. Example Exchanges
+   - 6.1 Awareness
+   - 6.2 PingPong
+7. Security Considerations
+8. IANA Considerations
+9. References
+
+---
+
 ## 1. Introduction
 
 The **Awareness Protocol (AWP)** defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.  
 It allows one entity to query the awareness of another, receive responses, and subscribe to notifications about awareness changes.
 
-Awareness information includes:
+The **PingPong Protocol (PPG)** provides a standardized mechanism to verify connectivity between two entities, measure latency, and detect lost connections.
 
-- Online/offline/busy states
-- Last seen timestamp
-- Optional geolocation (latitude/longitude)
-- Whether awareness was set by the device/network or by explicit user override
+Together, they form part of **BIMip** (Binary Interface for Messaging & Internet Protocol).
 
 ---
 
 ## 2. Terminology
 
-- **Epohai Identifier (EID):** A unique identifier for a user or device, e.g., `alice@domain.com/phone`
-- **Requester:** The entity asking about awareness
-- **Responder:** The entity whose awareness is being queried
-- **Notification:** A proactive awareness update sent without a request
-- **Route:** Logical identifier in the wrapper indicating which payload schema is carried
+- **EID**: Entity Identifier (e.g., `alice@domain.com/phone`)
+- **Awareness**: Presence information of an entity
+- **Stanza**: A protocol message unit
+- **PingPong**: Connectivity verification mechanism
 
 ---
 
-## 3. Protocol Overview
+## 3. Message Types
 
-The protocol defines **three primary message types**:
+### 3.1 Awareness Messages
 
-1. **AwarenessRequest** – Sent by a requester to query another entity’s awareness state
-2. **AwarenessResponse** – Sent by a responder to return the requested awareness state
-3. **AwarenessNotification** – Sent proactively to notify subscribers about awareness changes
+1. **AwarenessRequest** – Query another entity's awareness
+2. **AwarenessResponse** – Response to a request, containing status and metadata
+3. **AwarenessNotification** – Unsolicited update about awareness changes
 
-Messages are encoded using [Protocol Buffers](https://developers.google.com/protocol-buffers) for compact and interoperable serialization.  
-All messages are **wrapped in a `MessageScheme` envelope** that contains a `route` and a `oneof payload`. The route allows the client or server to know which schema to decode.
+### 3.2 PingPong Messages
+
+1. **PingPong** – A single stanza handling both Request and Response
 
 ---
 
-## 4. Message Structures
+## 4. Protocol Buffers Definitions
+
+### 4.1 Awareness
 
 ```proto
-syntax = "proto3";
-package dartmessaging;
-
-// AwarenessRequest: Query the awareness of another entity
+// Awareness Request
 message AwarenessRequest {
-  string from = 1;
-  string to = 2;
-  int64 request_id = 3;
+  string request_id = 1;
+  string from = 2;                 // Requesting entity
+  string to = 3;                   // Target entity
 }
 
-// AwarenessResponse: Reply to AwarenessRequest
+// Awareness Response
 message AwarenessResponse {
+  string request_id = 1;           // Matches AwarenessRequest
+  string from = 2;
+  string to = 3;
+  AwarenessStatus status = 4;      // ONLINE, OFFLINE, AWAY
+  int64 last_seen = 5;             // Unix UTC timestamp
+  double latitude = 6;             // Optional location
+  double longitude = 7;
+  AwarenessIntention intention = 8;// e.g., 1 = allow, 2 = block
+}
+
+// Awareness Notification
+message AwarenessNotification {
   string from = 1;
   string to = 2;
-  int64 request_id = 3;
-
-  AwarenessStatus status = 4;
-  int64 last_seen = 5;
-  double latitude = 6;
-  double longitude = 7;
-  int32 awareness_intention = 8; // 1 = device/network, 2 = user override
+  AwarenessStatus status = 3;
+  int64 last_seen = 4;
 }
 
-// AwarenessNotification: Push notifications about awareness changes
-message AwarenessNotification {
-  string from = 1;               // Entity whose awareness changed
-  string to = 2;                 // Target entity (EID)
-  AwarenessStatus status = 3;    // Current awareness state
-  int64 last_seen = 4;           // Unix UTC timestamp
-  double latitude = 5;           // Optional: defaults to 0.0 if not set
-  double longitude = 6;          // Optional: defaults to 0.0 if not set
-  int32 awareness_intention = 7; // Optional: defaults to 0 if not set
-}
-
-// AwarenessStatus Enumeration: Standardized awareness states
+// Awareness status enum
 enum AwarenessStatus {
-  STATUS_UNSPECIFIED = 0;
+  UNKNOWN = 0;
   ONLINE = 1;
   OFFLINE = 2;
   AWAY = 3;
-  DND = 4;
-  BUSY = 5;
-  INVISIBLE = 6;
-  NOT_FOUND = 7;
-  UNKNOWN = 8;
 }
 
-// Standardized error message
-message ErrorMessage {
-  int32 code = 1;          // Numeric error code (e.g., 400, 404, 500)
-  string message = 2;      // Human-readable error description
-  string route = 3;        // Optional: which route caused the error
-  string details = 4;      // Optional: extra context or debug info
-}
-
-// MessageScheme: Envelope for routing multiple schemas
-message MessageScheme {
-  int64 route = 1;  // Logical route identifier
-
-  oneof payload {
-    AwarenessNotification awareness_notification = 2;
-    AwarenessResponse awareness_response = 3;
-    ErrorMessage error_message = 4;
-  }
+// Awareness intention enum
+enum AwarenessIntention {
+  UNSPECIFIED = 0;
+  ALLOW = 1;
+  BLOCK = 2;
 }
 ```
 
-### Route numbers (example)
+---
 
-- `1` → AwarenessNotification
-- `2` → AwarenessResponse
+### 4.2 PingPong
 
-The client decodes `MessageScheme` first, inspects the `route`, then accesses the correct payload without looping or guessing.
+```java
+// PingPong message for connection health
+message PingPong {
+  string from = 1;          // Sender entity (EID)
+  string to = 2;            // Recipient entity (EID)
+  PingType type = 3;        // REQUEST = 1, RESPONSE = 2
+  PingStatus status = 4;    // UNKNOWN = 0, SUCCESS = 1, FAIL = 2
+  int64 request_time = 5;   // Unix UTC timestamp of request (ms)
+  int64 response_time = 6;  // Unix UTC timestamp of response (ms)
+}
+
+// Ping type: request or response
+enum PingType {
+  REQUEST = 1;
+  RESPONSE = 2;
+}
+
+// Optional status
+enum PingStatus {
+  UNKNOWN = 0;
+  SUCCESS = 1;
+  FAIL = 2;
+}
+
+```
 
 ---
 
 ## 5. Semantics
 
-### AwarenessRequest
+### 5.1 Awareness
 
-- **MUST** be answered with a corresponding `AwarenessResponse`, unless blocked or unauthorized.
+- **AwarenessRequest**: Must receive `AwarenessResponse`, unless blocked.
+- **AwarenessResponse**: Must include the original `request_id`.
+- **AwarenessNotification**: May be sent without acknowledgment.
 
-### AwarenessResponse
+### 5.2 PingPong
 
-- **MUST** include the same `request_id` as the original request.
-- Provides authoritative awareness state.
-
-### AwarenessNotification
-
-- **MAY** be sent by an entity or server to subscribed parties.
-- **MUST NOT** require acknowledgment.
+- **REQUEST**: Sent to verify connectivity.
+- **RESPONSE**: Sent with `response_time`.
+- Can be used to measure latency and detect lost connections.
 
 ---
 
 ## 6. Example Exchanges
 
-### Awareness Notification over WebSocket
+### 6.1 Awareness
 
-```proto
-def handle_cast({:fan_out_to_children, {owner_device_id, eid, awareness}}, state) do
-  // Build the AwarenessNotification struct
-  notification = %Dartmessaging.AwarenessNotification{
-    from: "#{awareness.owner_eid}",
-    last_seen: DateTime.to_unix(awareness.last_seen, :second),
-    status: awareness.status,
-    latitude: awareness.latitude,
-    longitude: awareness.longitude,
-    awareness_intention: awareness.awareness_intention
-  }
+**AwarenessRequest**
 
-  // Wrap in MessageScheme with route
-  message = %Dartmessaging.MessageScheme{
-    route: 1,  # Route for AwarenessNotification
-    payload: {:awareness_notification, notification}
-  }
-
-  // Encode into Protobuf binary
-  binary = Dartmessaging.MessageScheme.encode(message)
-
-  // Send over WebSocket
-  send(state.ws_pid, {:binary, binary})
-
-  {:noreply, state}
-end
+```java
+AwarenessRequest {
+  request_id: "12345",
+  from: "alice@domain.com/phone",
+  to: "bob@domain.com/laptop"
+}
 ```
 
-### Client Decoding
+### Awareness Response
 
-```proto
-message = Dartmessaging.MessageScheme.decode(binary)
-
-case message.payload do
-  {:awareness_notification, notif} ->
-    IO.inspect(notif)
-
-  {:awareness_response, resp} ->
-    IO.inspect(resp)
-
-  _ ->
-    Logger.error("Unknown route or payload")
-end
+```java
+AwarenessResponse {
+  "request_id": "12345",
+  "from": "bob@domain.com/laptop",
+  "to": "alice@domain.com/phone",
+  "status": "ONLINE",
+  "last_seen": 1693400000,
+  "latitude": 6.5244,
+  "longitude": 3.3792,
+  "awareness_intention": 1
+}
 
 ```
 
-Single decode of `MessageScheme` → inspect `route` → access correct payload.
+---
 
-Works for **one-to-one**, **fan-out**, or **group messages** over a single WebSocket.
+## 6.2 PingPong
+
+### Ping Request
+
+```java
+PingPong {
+  "from": "alice@domain.com/phone",
+  "to": "bob@domain.com/laptop",
+  "type": "REQUEST",
+  "status": "UNKNOWN",
+  "request_time": 1693405000
+}
+
+```
+
+### Ping Response
+
+```java
+PingPong {
+  "from": "bob@domain.com/laptop",
+  "to": "alice@domain.com/phone",
+  "type": "RESPONSE",
+  "status": "SUCCESS",
+  "request_time": 1693405000,
+  "response_time": 1693405005
+}
+
+```
 
 ---
 
 ## 7. Security Considerations
 
-- Authenticate awareness requests to prevent spoofing
-- Share sensitive metadata (e.g., location) only with authorized parties
-- Rate-limit notifications to prevent flooding
+- Authenticate **Awareness** requests to prevent spoofing.
+- Share sensitive metadata (e.g., location) **only with authorized parties**.
+- Rate-limit notifications to prevent flooding attacks.
+- Use **TLS** for all transport layers to ensure confidentiality and integrity.
 
 ---
 
 ## 8. IANA Considerations
 
-- Introduces a new namespace `awareness`; no IANA registry actions required currently
+- Introduces new namespaces: **awareness** and **pingpong**.
+- No IANA registry actions are required at this stage.
 
 ---
 
 ## 9. References
 
-- [RFC 6120] "Extensible Messaging and Presence Protocol (XMPP): Core", March 2011
-- [RFC 2778] "A Model for Presence and Instant Messaging", February 2000
-- [Protocol Buffers Specification](https://developers.google.com/protocol-buffers)
+- [RFC 6120] _Extensible Messaging and Presence Protocol (XMPP): Core_, March 2011.
+- [RFC 2778] _A Model for Presence and Instant Messaging_, February 2000.
+- _Protocol Buffers Specification_.
