@@ -284,9 +284,51 @@ send(state.ws_pid, {:binary, binary})
 
 ## 8. Security Considerations
 
-- Authenticate requests (awareness + pingpong).
-- Do not expose sensitive timing/location data without authorization.
-- Rate-limit PingPong requests to avoid abuse.
+## 8. Security Considerations
+
+### Transport Security
+
+- All BIMip communications (HTTP/WebSocket) **MUST** use TLS.
+
+### Authentication Architecture
+
+- User login and token issuance are handled by a separate Token Server.
+- BIMip servers do **not** generate tokens; they only verify JWT tokens presented by clients.
+- Tokens are signed by the Token Server using asymmetric cryptography (private key).
+- BIMip servers verify tokens using the built-in public key of the Token Server.
+
+### Token Usage on BIMip
+
+- Clients authenticate by passing the JWT as a Bearer token in the HTTP/WebSocket headers.
+
+**Example header:**
+
+```ruby
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhd...
+```
+
+### Token Verification (BIMip Server)
+
+- Validate the signature, expiry, and claims (`device_id`, `eid`) before allowing any message exchange.
+
+### WebSocket Connection Headers Example
+
+```yaml
+connection: Upgrade
+content-type: application/json
+date: Sat, 30 Aug 2025 14:27:00 GMT
+sec-websocket-accept: oNrKoJGqQvE9z/886oK2E4gfFVc=
+server: Cowboy
+upgrade: websocket
+x-connection: connected
+x-connection_time: 1756564021553
+x-host: wsone.com
+x-ip: 127.0.0.1
+x-message: Successful
+x-port: 54115
+x-status: 101
+x-user_agent: undefined
+```
 
 ---
 
@@ -302,3 +344,7 @@ send(state.ws_pid, {:binary, binary})
 - [RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
 - [RFC 2778] A Model for Presence and Instant Messaging, February 2000
 - [Protocol Buffers Specification](https://protobuf.dev/reference/protobuf/proto3-spec/)
+
+```
+
+```
