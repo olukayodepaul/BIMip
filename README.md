@@ -343,6 +343,4 @@ x-user_agent: undefined
 - [RFC 2778] A Model for Presence and Instant Messaging, February 2000
 - [Protocol Buffers Specification](https://protobuf.dev/reference/protobuf/proto3-spec/)
 
-```
 
-```
