@@ -1,4 +1,4 @@
-# BIMip (RFC-DRAFT)
+# BIMip-Foundation (RFC-DRAFT) 
 
 **Status:** Draft  
 **Category:** Standards Track  
