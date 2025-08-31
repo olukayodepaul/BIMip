@@ -178,6 +178,14 @@ enum PingStatus {
 ### MessageScheme Envelope
 
 ```ruby
+// Route numbers for MessageScheme:
+// 1 -> Logical route identifier (used internally)
+// 2 -> AwarenessNotification
+// 3 -> AwarenessResponse
+// 4 -> AwarenessRequest
+// 5 -> ErrorMessage
+// 6 -> PingPong message
+
 // MessageScheme: Envelope for routing multiple schemas
 message MessageScheme {
   int64 route = 1;  // Logical route identifier
@@ -185,10 +193,12 @@ message MessageScheme {
   oneof payload {
     AwarenessNotification awareness_notification = 2;
     AwarenessResponse awareness_response = 3;
-    ErrorMessage error_message = 4;
-    PingPong pingpong_message = 5;
+    AwarenessRequest awareness_request = 4;
+    ErrorMessage error_message = 5;
+    PingPong pingpong_message = 6;
   }
 }
+
 ```
 
 ---
