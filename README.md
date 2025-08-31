@@ -1,4 +1,3 @@
-
 # BIMip (RFC-DRAFT)
 
 **Status:** Draft  
@@ -108,7 +107,7 @@ All messages are wrapped in a `MessageScheme` **envelope** that contains a `rout
 
 ### 5.1 Awareness
 
-```proto
+````proto
 syntax = "proto3";
 package dartmessaging;
 
@@ -163,7 +162,7 @@ message ErrorMessage {
   string route = 3;
   string details = 4;
 }
-````
+
 
 ### 5.2 PingPong
 
@@ -190,7 +189,7 @@ enum PingStatus {
   SUCCESS = 1;
   FAIL = 2;
 }
-```
+````
 
 ### 5.3 TokenRevoke
 
@@ -248,23 +247,23 @@ message MessageScheme {
 
 ### 6.1 Awareness
 
-* Requests **MUST** be answered with responses unless blocked/unauthorized.
-* Responses **MUST** echo `request_id`.
-* Notifications **MAY** be sent proactively without acknowledgment.
+- Requests **MUST** be answered with responses unless blocked/unauthorized.
+- Responses **MUST** echo `request_id`.
+- Notifications **MAY** be sent proactively without acknowledgment.
 
 ### 6.2 PingPong
 
-* A PingPong **REQUEST** is used to test connection health.
-* A PingPong **RESPONSE** **MUST** be returned with same timestamps.
-* `status` indicates if the connectivity check was successful or failed.
+- A PingPong **REQUEST** is used to test connection health.
+- A PingPong **RESPONSE** **MUST** be returned with same timestamps.
+- `status` indicates if the connectivity check was successful or failed.
 
 ### 6.3 TokenRevoke
 
-* **from:** identifies the initiator of the revoke. Can include `device_eid` if action originates from a specific device.
-* **to:** identifies the target user or device. Including `device_eid` targets a specific device; omitting it applies to all devices under the user EID.
-* **type:** distinguishes between a **REQUEST** (initiated by client/server) and a **RESPONSE** (confirmation by server).
-* **timestamp:** marks when the revoke request or confirmation occurred.
-* Servers **MUST** immediately invalidate any revoked sessions and optionally notify other devices.
+- **from:** identifies the initiator of the revoke. Can include `device_eid` if action originates from a specific device.
+- **to:** identifies the target user or device. Including `device_eid` targets a specific device; omitting it applies to all devices under the user EID.
+- **type:** distinguishes between a **REQUEST** (initiated by client/server) and a **RESPONSE** (confirmation by server).
+- **timestamp:** marks when the revoke request or confirmation occurred.
+- Servers **MUST** immediately invalidate any revoked sessions and optionally notify other devices.
 
 ---
 
@@ -352,18 +351,18 @@ send(state.ws_pid, {:binary, binary})
 
 ### Transport Security
 
-* All BIMip communications (HTTP/WebSocket) **MUST** use TLS.
+- All BIMip communications (HTTP/WebSocket) **MUST** use TLS.
 
 ### Authentication Architecture
 
-* User login and token issuance are handled by a separate Token Server.
-* BIMip servers do **not** generate tokens; they only verify JWT tokens presented by clients.
-* Tokens are signed by the Token Server using asymmetric cryptography (private key).
-* BIMip servers verify tokens using the built-in public key of the Token Server.
+- User login and token issuance are handled by a separate Token Server.
+- BIMip servers do **not** generate tokens; they only verify JWT tokens presented by clients.
+- Tokens are signed by the Token Server using asymmetric cryptography (private key).
+- BIMip servers verify tokens using the built-in public key of the Token Server.
 
 ### Token Usage on BIMip
 
-* Clients authenticate by passing the JWT as a Bearer token in the HTTP/WebSocket headers.
+- Clients authenticate by passing the JWT as a Bearer token in the HTTP/WebSocket headers.
 
 **Example header:**
 
@@ -373,17 +372,17 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhd...
 
 ### Token Verification (BIMip Server)
 
-* Validate the signature, expiry, and claims (`device_eid`, `eid`) before allowing any message exchange.
+- Validate the signature, expiry, and claims (`device_eid`, `eid`) before allowing any message exchange.
 
 ---
 
 ## 9. IANA Considerations
 
-* Introduces new namespaces `awareness`, `pingpong`, `tokenrevoke`.
-* No IANA registry actions required currently.
+- Introduces new namespaces `awareness`, `pingpong`, `tokenrevoke`.
+- No IANA registry actions required currently.
 
 ---
 
 ## 10. References
 
-* \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 201
+- \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 201
