@@ -107,7 +107,7 @@ All messages are wrapped in a `MessageScheme` **envelope** that contains a `rout
 
 ### 5.1 Awareness
 
-````proto
+```proto
 syntax = "proto3";
 package dartmessaging;
 
@@ -163,7 +163,7 @@ message ErrorMessage {
   string details = 4;
 }
 
-
+```
 ### 5.2 PingPong
 
 ```proto
