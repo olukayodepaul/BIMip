@@ -284,8 +284,6 @@ send(state.ws_pid, {:binary, binary})
 
 ## 8. Security Considerations
 
-## 8. Security Considerations
-
 ### Transport Security
 
 - All BIMip communications (HTTP/WebSocket) **MUST** use TLS.
