@@ -1,6 +1,4 @@
-Ah! I understand now — you want **everything, including 5.2 PingPong, fully embedded in the single Markdown file**, so there’s no separation at all. Here’s the full BIMip RFC draft **all in one Markdown**, including **Awareness**, **PingPong**, and **TokenRevoke**:
 
-````markdown
 # BIMip (RFC-DRAFT)
 
 **Status:** Draft  
