@@ -177,7 +177,7 @@ enum PingStatus {
 
 ### MessageScheme Envelope
 
-```java
+```ruby
 // MessageScheme: Envelope for routing multiple schemas
 message MessageScheme {
   int64 route = 1;  // Logical route identifier
