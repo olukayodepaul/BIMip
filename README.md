@@ -184,13 +184,14 @@ enum PingType {
 
 // Optional status
 enum PingStatus {
-  PENDING =  0;
-  SUCCESS = 1;
-  FAIL = 2;
-  TIMEOUT = 3; //→ explicitly means no response in allowed window
-  BLOCKED = 4; // → privacy rule prevented delivery
-  UNREACHABLE = 5; // → user offline or no session found
+  PENDING = 0;     // int value = 0
+  SUCCESS = 1;     // int value = 1
+  FAIL = 2;        // int value = 2
+  TIMEOUT = 3;     // int value = 3
+  BLOCKED = 4;     // int value = 4
+  UNREACHABLE = 5; // int value = 5
 }
+
 ````
 
 ### 5.3 TokenRevoke
