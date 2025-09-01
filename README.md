@@ -167,27 +167,25 @@ message ErrorMessage {
 ### 5.2 PingPong
 
 ```proto
-// PingPong message for connection health
 message PingPong {
   string from = 1;          // Sender entity (EID)
   string to = 2;            // Recipient entity (EID)
-  PingType type = 3;        // REQUEST = 1, RESPONSE = 2
-  PingStatus status = 4;    // UNKNOWN = 0, SUCCESS = 1, FAIL = 2
+  PingType type = 3;        // REQUEST = 0, RESPONSE = 1
+  PingStatus status = 4;    // SUCCESS = 0, FAIL = 1
   int64 request_time = 5;   // Unix UTC timestamp of request (ms)
   int64 response_time = 6;  // Unix UTC timestamp of response (ms)
 }
 
 // Ping type
 enum PingType {
-  REQUEST = 1;
-  RESPONSE = 2;
+  REQUEST = 0;
+  RESPONSE = 1;
 }
 
 // Optional status
 enum PingStatus {
-  UNKNOWN = 0;
-  SUCCESS = 1;
-  FAIL = 2;
+  SUCCESS = 0;
+  FAIL = 1;
 }
 ````
 
