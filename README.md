@@ -178,8 +178,8 @@ message PingPong {
 
 // Ping type
 enum PingType {
-  REQUEST = 0;
-  RESPONSE = 1;
+  REQUEST = 0; // int value = 0
+  RESPONSE = 1; // int value = 1
 }
 
 // Optional status
