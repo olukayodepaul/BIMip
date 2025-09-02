@@ -121,16 +121,14 @@ message AwarenessRequest {
 
 // Response to an AwarenessRequest
 message AwarenessResponse {
-  string from = 1;                 // Responding entity (EID)
-  string to = 2;                   // Original requester (EID)
-  int64 awareness_identifier = 3;  // Must match AwarenessRequest.request_id
-
-  AwarenessStatus status = 4;    // Awareness state
-  int64 last_seen = 5;           // Unix UTC timestamp
-  double latitude = 6;           // Optional: defaults to 0.0 if not set
-  double longitude = 7;          // Optional: defaults to 0.0 if not set
-  int32 awareness_intention = 8; // Optional: defaults to 0 if not set
-  int64 timestamp = 9;           // Unix UTC timestamp of this response
+  string from = 1;                       // Responding entity (EID)
+  string to = 2;                         // Original requester (EID)
+  string awareness_identifier = 3;       // Must match AwarenessRequest.awareness_identifier
+  AwarenessStatus status = 4;            // Awareness state
+  double latitude = 5;                   // Optional: defaults to 0.0 if not set
+  double longitude = 6;                  // Optional: defaults to 0.0 if not set
+  int32 awareness_intention = 7;         // Optional: defaults to 0 if not set
+  int64 timestamp = 8;                    // Unix UTC timestamp (ms) of response
 }
 
 // AwarenessNotification: Push notifications about awareness changes
