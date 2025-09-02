@@ -115,7 +115,7 @@ package dartmessaging;
 message AwarenessRequest {
   string from = 1;       // Requesting entity (EID)
   string to = 2;         // Target entity (EID)
-  int64 awareness_identifier = 3;  // Unique request identifier
+  int64 awareness_identifier = 3;  // Unique request identifier (System.system_time(:millisecond))
 }
 
 // Response to an AwarenessRequest
