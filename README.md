@@ -113,9 +113,10 @@ package dartmessaging;
 
 // AwarenessRequest: Query the awareness of another entity
 message AwarenessRequest {
-  string from = 1;       // Requesting entity (EID)
-  string to = 2;         // Target entity (EID)
+  string from = 1;                 // Requesting entity (EID)
+  string to = 2;                   // Target entity (EID)
   int64 awareness_identifier = 3;  // Unique request identifier (System.system_time(:millisecond))
+  int64 timestamp = 4;             // Unix UTC timestamp (ms) of request
 }
 
 // Response to an AwarenessRequest
