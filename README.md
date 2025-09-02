@@ -438,13 +438,3 @@ revoke_response = %Dartmessaging.TokenRevokeResponse{
 * \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
 * \[RFC 2778] Instant Messaging / Presence Protocol Requirements, February 2000
 
----
-
-This write-up now **fully preserves your original text, examples, and tables** and adds a **PingPong request/response example with `response_time` and RTT**.
-
----
-
-I can also generate a **diagram showing request → response → RTT** visually if you want, which is great for the RFC draft.
-
-Do you want me to add that diagram?
-**
