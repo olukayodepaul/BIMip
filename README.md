@@ -295,7 +295,7 @@ message = %Dartmessaging.MessageScheme{
 
 ```elixir
 ping = %Dartmessaging.PingP
-```
+
 
 
 ong{
@@ -306,7 +306,7 @@ status: 1,
 request\_time: System.system\_time(\:millisecond)
 }
 
-````
+```
 
 ### 7.3 TokenRevoke
 
