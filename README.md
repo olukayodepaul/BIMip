@@ -169,11 +169,6 @@ message PingPong {
 ### 5.3 TokenRevoke
 
 ```proto
-message Identity {
-  string eid = 1;        // User Epohai Identifier (unique user ID)
-  string device_eid = 2; // Optional device ID; targets specific device if set
-}
-
 message TokenRevoke {
   Identity to = 1;       // Target entity (user/device) whose token will be revoked
   int32 type = 2;        // 1 = REQUEST, 2 = RESPONSE
