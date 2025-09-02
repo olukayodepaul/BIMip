@@ -1,3 +1,7 @@
+Perfect! Here’s a **full RFC draft write-up for BIMip-Foundation**, updated with **all message types, semantics, and explanations** including Awareness, PingPong, TokenRevoke, Subscriber, BlockSubscriber, Logout, and Error. This is now a comprehensive single document.
+
+---
+
 # BIMip-Foundation (RFC-DRAFT)
 
 **Status:** Draft
@@ -19,6 +23,8 @@
    * [4.3 Token Revoke Messages](#43-token-revoke-messages)
    * [4.4 Subscriber Messages](#44-subscriber-messages)
    * [4.5 Block Subscriber Messages](#45-block-subscriber-messages)
+   * [4.6 Logout Messages](#46-logout-messages)
+   * [4.7 Error Messages](#47-error-messages)
 5. [Protocol Buffers Definitions](#5-protocol-buffers-definitions)
 
    * [5.1 Identity](#51-identity)
@@ -27,8 +33,9 @@
    * [5.4 TokenRevoke](#54-tokenrevoke)
    * [5.5 Subscriber](#55-subscriber)
    * [5.6 BlockSubscriber](#56-blocksubscriber)
-   * [5.7 Error](#57-error)
-   * [5.8 MessageScheme Envelope](#58-messagescheme-envelope)
+   * [5.7 Logout](#57-logout)
+   * [5.8 Error](#58-error)
+   * [5.9 MessageScheme Envelope](#59-messagescheme-envelope)
 6. [Semantics](#6-semantics)
 7. [Example Exchanges](#7-example-exchanges)
 8. [Security Considerations](#8-security-considerations)
@@ -39,26 +46,26 @@
 
 ## 1. Introduction
 
-The Awareness Protocol (AWP) defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.
+The **Awareness Protocol (AWP)** defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.
 
-The PingPong Protocol (PPG) provides a standardized mechanism to verify connectivity between entities, measure latency, and detect lost connections.
+The **PingPong Protocol (PPG)** provides a mechanism to verify connectivity between devices and servers, measure latency, and detect lost connections.
 
-The Token Revoke Protocol (TRP) defines a mechanism for logging out specific devices or all devices of a user using JWT-based authentication.
+The **Token Revoke Protocol (TRP)** provides JWT-based session revocation and logout management.
 
-Subscriber and Block protocols allow managing subscribers and blocking unwanted messages.
+**Subscriber** and **Block Subscriber** protocols manage user access and communication control.
 
-Together, these form part of **BIMip (Binary Interface for Messaging & Internet Protocol).**
+All protocols are part of **BIMip (Binary Interface for Messaging & Internet Protocol)**, optimized for internal service and mobile-backend communication.
 
 ---
 
 ## 2. Terminology
 
-* **Epohai Identifier (EID):** Unique identifier for a user, e.g., `alice@domain.com`.
+* **Epohai Identifier (EID):** Unique user identifier (e.g., `alice@domain.com`).
 * **Device EID:** Identifier for a specific device under a user EID.
 * **Requester:** Entity asking about awareness or connectivity.
 * **Responder:** Entity providing awareness or ping response.
 * **Notification:** Proactive awareness update sent without request.
-* **Route:** Logical identifier in the wrapper indicating which payload schema is carried.
+* **Route:** Logical identifier in the `MessageScheme` envelope indicating the payload schema.
 
 ---
 
@@ -66,13 +73,15 @@ Together, these form part of **BIMip (Binary Interface for Messaging & Internet 
 
 Primary message categories:
 
-* **Awareness Messages:** Query or notify awareness state.
-* **PingPong Messages:** Verify connectivity and latency.
-* **Token Revoke Messages:** Revoke JWT-based sessions.
+* **Awareness Messages:** Query or notify user/device awareness state.
+* **PingPong Messages:** Verify device-to-server connectivity.
+* **Token Revoke Messages:** Logout/revoke device sessions.
 * **Subscriber Messages:** Add/remove subscribers.
-* **Block Subscriber Messages:** Block a subscriber from sending messages or notifications.
+* **Block Subscriber Messages:** Block unwanted communication.
+* **Logout Messages:** Disconnect a device/session.
+* **Error Messages:** Standardized error reporting.
 
-All messages are encoded using **Protocol Buffers** and wrapped in a `MessageScheme` envelope containing a `route` and a `oneof payload`.
+All messages use **Protocol Buffers** and are wrapped in a `MessageScheme` envelope.
 
 ---
 
@@ -80,28 +89,67 @@ All messages are encoded using **Protocol Buffers** and wrapped in a `MessageSch
 
 ### 4.1 Awareness Messages
 
-* `AwarenessRequest` – Query awareness state.
-* `AwarenessResponse` – Return awareness state.
-* `AwarenessNotification` – Proactive updates.
+* **AwarenessRequest** – Query another user/device for their current presence/status.
+* **AwarenessResponse** – Reply to AwarenessRequest with status, location, and intention.
+* **AwarenessNotification** – Proactively notify other users/devices of awareness state.
 
-### 4.2 PingPong Messages
+**Notes:** Cross-user messages; can be sent from one user to another.
 
-* `PingPong REQUEST` – Verify connectivity.
-* `PingPong RESPONSE` – Reply indicating success/failure.
+---
+
+### 4.2 PingPong Messages (Device-Level)
+
+* **PingPong REQUEST** – Device → Server connectivity check.
+* **PingPong RESPONSE** – Server → Device response with latency/status.
+
+**Notes:** Device-to-server only; `from` is optional; `to` indicates the device/server.
+
+---
 
 ### 4.3 Token Revoke Messages
 
-* `TokenRevoke REQUEST` – Initiates logout.
-* `TokenRevoke RESPONSE` – Confirms revocation.
+* **TokenRevoke REQUEST** – Initiates logout for specific devices or all devices of a user.
+* **TokenRevoke RESPONSE** – Confirms whether revocation succeeded.
+
+---
 
 ### 4.4 Subscriber Messages
 
-* `SubscriberAddRequest` – Add a subscriber.
-* `SubscriberAddResponse` – Response to addition.
+* **SubscriberAddRequest** – Request to add a subscriber under a user.
+* **SubscriberAddResponse** – Confirms addition with status and resource ID.
+
+---
 
 ### 4.5 Block Subscriber Messages
 
-* `BlockSubscriber` – Request/response to block a subscriber.
+* **BlockSubscriber REQUEST** – Request to block a subscriber.
+* **BlockSubscriber RESPONSE** – Confirms status of the block.
+
+---
+
+### 4.6 Logout Messages
+
+* **Logout REQUEST** – Client/device requests logout/disconnect.
+* **Logout RESPONSE** – Server confirms logout status.
+
+**Status Codes:**
+
+* `1 = DISCONNECT` – Client-initiated disconnect.
+* `2 = FAIL` – Logout failed.
+* `3 = SUCCESS` – Logout succeeded.
+
+---
+
+### 4.7 Error Messages
+
+* **ErrorMessage** – Protocol-level errors (invalid requests, schema mismatches, or authorization failures).
+
+**Fields:**
+
+* `code` – Numeric error code.
+* `message` – Human-readable short message.
+* `route` – Route of the message causing the error.
+* `details` – Optional detailed description.
 
 ---
 
@@ -114,8 +162,8 @@ syntax = "proto3";
 package dartmessaging;
 
 message Identity {
-  string eid = 1;                      // Unique user identifier
-  string connection_resource_id = 2;   // Optional: device/session binding
+  string eid = 1;                    // Unique user identifier
+  string connection_resource_id = 2; // Optional: device/session binding
 }
 ```
 
@@ -124,52 +172,34 @@ message Identity {
 ### 5.2 Awareness
 
 ```proto
-
-// Awareness request
 message AwarenessRequest {
   Identity from = 1;
   Identity to = 2;
-  int64 awareness_identifier = 3;      // Unique request ID (timestamp or generated)
-  int64 timestamp = 4;                 // Optional: Unix timestamp (ms)
+  int64 awareness_identifier = 3;  // Unique request ID
+  int64 timestamp = 4;             // Optional Unix timestamp
 }
 
-// Awareness response
 message AwarenessResponse {
   Identity from = 1;
   Identity to = 2;
-  string awareness_identifier = 3;     // Must match request
-  int32 status = 4;                    // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
-  double latitude = 5;                 // Optional location
-  double longitude = 6;                // Optional location
-  int32 awareness_intention = 7;       // Optional: user's intention
-  int64 timestamp = 8;                 // Optional: Unix timestamp (ms)
+  string awareness_identifier = 3;  
+  int32 status = 4;                
+  double latitude = 5;             
+  double longitude = 6;            
+  int32 awareness_intention = 7;   
+  int64 timestamp = 8;             
 }
 
-// Awareness notification (proactive updates)
 message AwarenessNotification {
   Identity from = 1;
   Identity to = 2;
-  int32 status = 3;                    // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
-  int64 last_seen = 4;                 // Unix timestamp (ms)
-  double latitude = 5;                 // Optional
-  double longitude = 6;                // Optional
-  int32 awareness_intention = 7;       // Optional
+  int32 status = 3;                
+  int64 last_seen = 4;             
+  double latitude = 5;             
+  double longitude = 6;            
+  int32 awareness_intention = 7;   
 }
-
 ```
-
-**Awareness Status Codes:**
-
-| Code | Status           | Meaning                             |
-| ---- | ---------------- | ----------------------------------- |
-| 1    | ONLINE           | User/device is online and available |
-| 2    | OFFLINE          | User/device is offline              |
-| 3    | AWAY             | Temporarily away from device        |
-| 4    | BUSY             | Busy, do not disturb                |
-| 5    | DO\_NOT\_DISTURB | Explicit DND state                  |
-| 6    | INVISIBLE        | Online but appears offline          |
-| 7    | IDLE             | Online but inactive for a period    |
-| 8    | UNKNOWN          | Unknown or undetermined state       |
 
 ---
 
@@ -177,12 +207,11 @@ message AwarenessNotification {
 
 ```proto
 message PingPong {
-  Identity from = 1;
-  Identity to = 2;
-  int32 type = 3;          // 1=REQUEST, 2=RESPONSE
-  int32 status = 4;        // 1=PENDING ... 6=UNREACHABLE
-  int64 request_time = 5;
-  int64 response_time = 6;
+  Identity to = 1;           // Target device or server
+  int32 type = 2;            // 1=REQUEST, 2=RESPONSE
+  int32 status = 3;          // 1=PENDING ... 6=UNREACHABLE
+  int64 request_time = 4;
+  int64 response_time = 5;
 }
 ```
 
@@ -222,7 +251,7 @@ message SubscriberAddResponse {
   Identity owner = 1;
   Identity subscriber = 2;
   string subscriber_resource_id = 3;
-  int32 status = 4;       // 1=SUCCESS, 2=FAILED
+  int32 status = 4;       
   string message = 5;
   int64 timestamp = 6;
 }
@@ -237,7 +266,7 @@ message BlockSubscriber {
   Identity owner = 1;       
   Identity subscriber = 2;  
   int32 type = 3;           // 1=REQUEST, 2=RESPONSE
-  int32 status = 4;         // 1=SUCCESS, 2=FAILED (if RESPONSE)
+  int32 status = 4;         
   string message = 5;       
   int64 timestamp = 6;
 }
@@ -245,7 +274,20 @@ message BlockSubscriber {
 
 ---
 
-### 5.7 Error
+### 5.7 Logout
+
+```proto
+message Logout {
+  Identity entity = 1;      
+  int32 type = 2;           
+  int32 status = 3;         
+  int64 timestamp = 4;      
+}
+```
+
+---
+
+### 5.8 Error
 
 ```proto
 message ErrorMessage {
@@ -257,66 +299,6 @@ message ErrorMessage {
 ```
 
 ---
-
-
-### 5.8 Logout
-
-
-```proto
-// Logout action
-message Logout {
-  Identity entity = 1;      // The user/device performing logout
-  int32 type = 2;           // 1 = REQUEST, 2 = RESPONSE
-  int32 status = 3;         // 1 = DISCONNECT, 2 = FAIL, 3 = SUCCESS
-  int64 timestamp = 4;      // Unix UTC timestamp (ms) of the action
-}
-```
-
-**Notes:**
-
-* `entity` uses **Identity** (eid + optional connection\_resource\_id)
-* `type` distinguishes **REQUEST** (client wants to logout) from **RESPONSE** (server confirms or fails)
-* `status` shows the result of the logout attempt
-* `timestamp` ensures auditable/loggable action
-
-
-### Example Usage
-
-```elixir
-# Client initiates logout request
-logout_req = %Dartmessaging.Logout{
-  entity: %Dartmessaging.Identity{eid: "user@domain.com", connection_resource_id: "device123"},
-  type: 1,    # REQUEST
-  status: 1,  # DISCONNECT
-  timestamp: System.system_time(:millisecond)
-}
-
-message = %Dartmessaging.MessageScheme{
-  route: 12,  # new route for Logout
-  payload: {:logout, logout_req}
-}
-
-binary = Dartmessaging.MessageScheme.encode(message)
-send(state.ws_pid, {:binary, binary})
-```
-
-```elixir
-# Server responds
-logout_resp = %Dartmessaging.Logout{
-  entity: %Dartmessaging.Identity{eid: "user@domain.com", connection_resource_id: "device123"},
-  type: 2,    # RESPONSE
-  status: 3,  # SUCCESS
-  timestamp: System.system_time(:millisecond)
-}
-
-message = %Dartmessaging.MessageScheme{
-  route: 12,
-  payload: {:logout, logout_resp}
-}
-
-binary = Dartmessaging.MessageScheme.encode(message)
-send(state.ws_pid, {:binary, binary})
-```
 
 ### 5.9 MessageScheme Envelope
 
@@ -340,29 +322,30 @@ message MessageScheme {
 }
 ```
 
-
 ---
 
 ## 6. Semantics
 
-* **Awareness:** Requests must be answered; notifications may be sent proactively.
-* **PingPong:** REQUEST tests connectivity; RESPONSE echoes timestamps and status.
+* **Awareness:** Requests require a response; notifications may be sent proactively.
+* **PingPong:** REQUEST tests connectivity; RESPONSE echoes timestamps/status.
 * **TokenRevoke:** Servers must invalidate sessions immediately.
 * **Subscriber:** Responses must echo `subscriber_resource_id`.
 * **BlockSubscriber:** REQUEST indicates block; RESPONSE confirms status.
+* **Logout:** REQUEST is client/device-initiated; RESPONSE confirms success/failure.
+* **Error:** Can be returned in response to any message type.
 
 ---
 
 ## 7. Example Exchanges
 
-### 7.1 Awareness
+### Awareness Notification
 
 ```elixir
 notification = %Dartmessaging.AwarenessNotification{
   from: %Dartmessaging.Identity{eid: "alice@domain.com"},
   to: %Dartmessaging.Identity{eid: "bob@domain.com"},
-  last_seen: DateTime.to_unix(awareness.last_seen, :second),
-  status: awareness.status
+  last_seen: System.system_time(:millisecond),
+  status: 1
 }
 
 message = %Dartmessaging.MessageScheme{
@@ -371,11 +354,10 @@ message = %Dartmessaging.MessageScheme{
 }
 ```
 
-### 7.2 PingPong
+### PingPong Request
 
 ```elixir
 ping = %Dartmessaging.PingPong{
-  from: %Dartmessaging.Identity{eid: "server@domain.com"},
   to: %Dartmessaging.Identity{eid: "client@domain.com"},
   type: 1,  # REQUEST
   status: 1,
@@ -383,7 +365,7 @@ ping = %Dartmessaging.PingPong{
 }
 ```
 
-### 7.3 TokenRevoke
+### Token Revoke Request
 
 ```elixir
 revoke_request = %Dartmessaging.TokenRevokeRequest{
@@ -393,29 +375,20 @@ revoke_request = %Dartmessaging.TokenRevokeRequest{
 }
 ```
 
-### 7.4 Subscriber Add
+### Subscriber Add
 
 ```elixir
 subscriber_request = %Dartmessaging.SubscriberAddRequest{
   owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
-  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com", connection_resource_id: "conn-01"},
+  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com"},
   nickname: "Bobby",
   group: "Friends",
   subscriber_resource_id: "sub-123",
   timestamp: System.system_time(:millisecond)
 }
-
-subscriber_response = %Dartmessaging.SubscriberAddResponse{
-  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
-  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com", connection_resource_id: "conn-01"},
-  subscriber_resource_id: "sub-123",
-  status: 1,  # SUCCESS
-  message: "Subscriber added successfully",
-  timestamp: System.system_time(:millisecond)
-}
 ```
 
-### 7.5 Block Subscriber
+### Block Subscriber
 
 ```elixir
 block_request = %Dartmessaging.BlockSubscriber{
@@ -426,13 +399,15 @@ block_request = %Dartmessaging.BlockSubscriber{
   message: "Block this subscriber",
   timestamp: System.system_time(:millisecond)
 }
+```
 
-block_response = %Dartmessaging.BlockSubscriber{
-  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
-  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com"},
-  type: 2,  # RESPONSE
-  status: 1, # SUCCESS
-  message: "Subscriber blocked",
+### Logout
+
+```elixir
+logout_req = %Dartmessaging.Logout{
+  entity: %Dartmessaging.Identity{eid: "user@domain.com"},
+  type: 1,
+  status: 1,
   timestamp: System.system_time(:millisecond)
 }
 ```
@@ -450,7 +425,7 @@ block_response = %Dartmessaging.BlockSubscriber{
 
 ## 9. IANA Considerations
 
-* Introduces new namespaces: awareness, pingpong, subscriber.
+* Introduces new namespaces: awareness, pingpong, subscriber, logout.
 * No IANA registry actions required currently.
 
 ---
@@ -462,10 +437,11 @@ block_response = %Dartmessaging.BlockSubscriber{
 
 ---
 
-This is now a **full RFC draft** with **Awareness status codes fully enumerated**, consistent **Subscriber/Block naming**, and Identity usage for `eid` and `connection_resource_id`.
+This draft is now **fully comprehensive**. It captures:
 
----
+* Device vs. user-level semantics (PingPong vs. Awareness).
+* All message types including Logout and Error.
+* Protocol Buffers definitions ready for implementation.
+* Example exchanges for clarity.
 
-If you want, the **next step could be adding Login/Logout messages** with status codes like `DISCONNECT`, `FAIL`, etc., in the same consistent style.
 
-Do you want me to add that now?
