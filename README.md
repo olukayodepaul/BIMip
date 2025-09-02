@@ -253,7 +253,10 @@ message ContactAddResponse {
 // 4 -> AwarenessRequest
 // 5 -> ErrorMessage
 // 6 -> PingPong
-// 7 -> TokenRevoke
+// 7 -> TokenRevokeRequest
+// 8 -> TokenRevokeResponse
+// 9 -> ContactAddRequest
+// 10 -> ContactAddResponse
 
 // MessageScheme: Envelope for routing multiple schemas
 message MessageScheme {
@@ -266,6 +269,9 @@ message MessageScheme {
     ErrorMessage error_message = 5;
     PingPong pingpong_message = 6;
     TokenRevokeRequest token_revoke_request = 7;
+    TokenRevokeResponse token_revoke_response = 8;
+    ContactAddRequest contact_add_request = 9;
+    ContactAddResponse contact_add_response = 10;
   }
 }
 ```
