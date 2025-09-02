@@ -169,10 +169,16 @@ message PingPong {
 ### 5.3 TokenRevoke
 
 ```proto
-message TokenRevoke {
-  Identity to = 1;       // Target entity (user/device) whose token will be revoked
-  int32 type = 2;        // 1 = REQUEST, 2 = RESPONSE
-  int64 timestamp = 3;   // Unix UTC timestamp of revoke request for auditing/logging
+message TokenRevokeRequest {
+  Identity to = 1;       
+  string token = 2;       // raw JWT string
+  int64 timestamp = 3;    // for auditing/logging
+}
+
+message TokenRevokeResponse {
+  Identity to = 1;        
+  int32 status = 2;       // 1 = SUCCESS, 2 = FAILED
+  int64 timestamp = 3;
 }
 
 ```
@@ -212,7 +218,7 @@ message MessageScheme {
     AwarenessRequest awareness_request = 4;
     ErrorMessage error_message = 5;
     PingPong pingpong_message = 6;
-    TokenRevoke token_revoke = 7;
+    TokenRevokeRequest token_revoke_request = 7;
   }
 }
 ```
