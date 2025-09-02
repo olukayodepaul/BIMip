@@ -121,7 +121,7 @@ package dartmessaging;
 ### 5.2 Awareness
 
 ```proto
-equest = %Dartmessaging.AwarenessRequest{
+message AwarenessRequest = %Dartmessaging.AwarenessRequest{
   from: %Dartmessaging.Identity{ eid: "a@domain.com" },
   to: %Dartmessaging.Identity{ eid: "b@domain.com" },
   awareness_identifier: System.system_time(:millisecond),
