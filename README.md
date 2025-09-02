@@ -166,14 +166,10 @@ message Identity {
 
 message TokenRevoke {
   Identity to = 1;       // Target entity (user/device) whose token will be revoked
-  RevokeType type = 2;   // REQUEST = client initiates logout, RESPONSE = server confirms revocation
+  int32 type = 2;        // 1 = REQUEST, 2 = RESPONSE
   int64 timestamp = 3;   // Unix UTC timestamp of revoke request for auditing/logging
 }
 
-enum RevokeType {
-  REQUEST = 1;  // Client initiates logout
-  RESPONSE = 2; // Server confirms revocation
-}
 ```
 
 ### 5.4  Error
