@@ -119,40 +119,25 @@ message AwarenessRequest {
   int64 timestamp = 4;             // Unix UTC timestamp (ms) of request
 }
 
-// Response to an AwarenessRequest
 message AwarenessResponse {
-  string from = 1;                       // Responding entity (EID)
-  string to = 2;                         // Original requester (EID)
-  string awareness_identifier = 3;       // Must match AwarenessRequest.awareness_identifier
-  AwarenessStatus status = 4;            // Awareness state
-  double latitude = 5;                   // Optional: defaults to 0.0 if not set
-  double longitude = 6;                  // Optional: defaults to 0.0 if not set
-  int32 awareness_intention = 7;         // Optional: defaults to 0 if not set
-  int64 timestamp = 8;                    // Unix UTC timestamp (ms) of response
+  string from = 1;                    // Responding entity (EID)
+  string to = 2;                      // Original requester (EID)
+  string awareness_identifier = 3;    // Must match AwarenessRequest.awareness_identifier
+  int32 status = 4;                   // Awareness state: 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=DND, 5=BUSY, 6=INVISIBLE, 7=NOT_FOUND, 8=UNKNOWN
+  double latitude = 5;                // Optional
+  double longitude = 6;               // Optional
+  int32 awareness_intention = 7;      // Optional, defaults to 0
+  int64 timestamp = 8;                // Unix UTC timestamp (ms) of response
 }
 
-// AwarenessNotification: Push notifications about awareness changes
 message AwarenessNotification {
-  string from = 1;               // Entity whose awareness changed
-  string to = 2;                 // Target entity (EID)
-  AwarenessStatus status = 3;    // Current awareness state
-  int64 last_seen = 4;           // Unix UTC timestamp
-  double latitude = 5;           // Optional
-  double longitude = 6;          // Optional
-  int32 awareness_intention = 7; // Optional
-}
-
-// AwarenessStatus Enumeration
-enum AwarenessStatus {
-  STATUS_UNSPECIFIED = 0;
-  ONLINE = 1;
-  OFFLINE = 2;
-  AWAY = 3;
-  DND = 4;
-  BUSY = 5;
-  INVISIBLE = 6;
-  NOT_FOUND = 7;
-  UNKNOWN = 8;
+  string from = 1;                     // Entity whose awareness changed
+  string to = 2;                       // Target entity (EID)
+  int32 status = 3;                     // Awareness state: 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=DND, 5=BUSY, 6=INVISIBLE, 7=NOT_FOUND, 8=UNKNOWN
+  int64 last_seen = 4;                  // Unix UTC timestamp
+  double latitude = 5;                  // Optional
+  double longitude = 6;                 // Optional
+  int32 awareness_intention = 7;        // Optional, defaults to 0
 }
 
 // Standardized error message
