@@ -170,28 +170,11 @@ message ErrorMessage {
 message PingPong {
   string from = 1;          // Sender entity (EID)
   string to = 2;            // Recipient entity (EID)
-  PingType type = 3;        // REQUEST = 0, RESPONSE = 1
-  PingStatus status = 4;    // SUCCESS = 0, FAIL = 1,  UNIQUE = 3;
+  int64 type = 3;           // 1 = REQUEST, 2 = RESPONSE
+  int64 status = 4;         // 1 = PENDING, 2 = SUCCESS, 3 = FAIL, 4 = TIMEOUT, 5 = BLOCKED, 6 = UNREACHABLE
   int64 request_time = 5;   // Unix UTC timestamp of request (ms)
   int64 response_time = 6;  // Unix UTC timestamp of response (ms)
 }
-
-// Ping type
-enum PingType {
-  REQUEST = 0; // int value = 0
-  RESPONSE = 1; // int value = 1
-}
-
-// Optional status
-enum PingStatus {
-  PENDING = 0;     // int value = 0
-  SUCCESS = 1;     // int value = 1
-  FAIL = 2;        // int value = 2
-  TIMEOUT = 3;     // int value = 3
-  BLOCKED = 4;     // int value = 4
-  UNREACHABLE = 5; // int value = 5
-}
-
 ````
 
 ### 5.3 TokenRevoke
