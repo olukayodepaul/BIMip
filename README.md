@@ -294,11 +294,7 @@ message = %Dartmessaging.MessageScheme{
 ### 7.2 PingPong
 
 ```elixir
-ping = %Dartmessaging.PingP
-
-
-
-ong{
+ping = %Dartmessaging.PingPong{
 from: %Dartmessaging.Identity{eid: "[server@domain.com](mailto:server@domain.com)"},
 to: %Dartmessaging.Identity{eid: "[client@domain.com](mailto:client@domain.com)"},
 type: 1,  # REQUEST
