@@ -205,10 +205,9 @@ message Identity {
 
 // Token revoke / logout message
 message TokenRevoke {
-  Identity from = 1;        // Initiator (user or server)
-  Identity to = 2;          // Target entity (user/device)
-  RevokeType type = 3;      // REQUEST = 1, RESPONSE = 2
-  int64 timestamp = 4;      // Unix UTC timestamp
+  Identity to = 1;          // Target entity (user/device)
+  RevokeType type = 2;      // REQUEST = 1, RESPONSE = 2
+  int64 timestamp = 3;      // Unix UTC timestamp
 }
 
 enum RevokeType {
