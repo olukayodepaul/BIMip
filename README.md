@@ -140,13 +140,7 @@ message AwarenessNotification {
   int32 awareness_intention = 7;        // Optional, defaults to 0
 }
 
-// Standardized error message
-message ErrorMessage {
-  int32 code = 1;
-  string message = 2;
-  string route = 3;
-  string details = 4;
-}
+
 
 ```
 ### 5.2 PingPong
@@ -180,6 +174,19 @@ enum RevokeType {
   REQUEST = 1;  // Client initiates logout
   RESPONSE = 2; // Server confirms revocation
 }
+```
+
+### 5.4  Error
+
+```
+// Standardized error message
+message ErrorMessage {
+  int32 code = 1;
+  string message = 2;
+  string route = 3;
+  string details = 4;
+}
+
 ```
 
 ### MessageScheme Envelope
