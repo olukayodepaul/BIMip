@@ -243,6 +243,26 @@ message ContactAddResponse {
 
 ```
 
+### Block Subscriber 5.6
+
+```
+// Identity structure for user/entity
+message Identity {
+  string eid = 1; // User/entity identifier
+}
+
+// Block subscriber action
+message BlockSubscriber {
+  Identity owner = 1;       // The user performing the block
+  Identity subscriber = 2;  // The user being blocked
+  int32 type = 3;           // 1 = REQUEST, 2 = RESPONSE
+  int32 status = 4;         // 1 = SUCCESS, 2 = FAILED (used only if type = RESPONSE)
+  string message = 5;       // Optional message (used only if type = RESPONSE)
+  int64 timestamp = 6;      // Unix UTC timestamp (ms) of action
+}
+
+```
+
 ### MessageScheme Envelope
 
 ```proto
