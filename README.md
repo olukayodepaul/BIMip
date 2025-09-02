@@ -134,24 +134,37 @@ message AwarenessRequest {
 message AwarenessResponse {
   Identity from = 1;
   Identity to = 2;
-  string awareness_identifier = 3;  // Must match request
-  int32 status = 4;                 // 1=ONLINE ... 8=UNKNOWN
-  double latitude = 5;              // Optional
-  double longitude = 6;             // Optional
-  int32 awareness_intention = 7;    // Optional
+  string awareness_identifier = 3;  
+  int32 status = 4;                 // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
+  double latitude = 5;              
+  double longitude = 6;             
+  int32 awareness_intention = 7;    
   int64 timestamp = 8;
 }
 
 message AwarenessNotification {
   Identity from = 1;
   Identity to = 2;
-  int32 status = 3;
+  int32 status = 3;                 // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
   int64 last_seen = 4;
   double latitude = 5;
   double longitude = 6;
   int32 awareness_intention = 7;
 }
 ```
+
+**Awareness Status Codes:**
+
+| Code | Status           | Meaning                             |
+| ---- | ---------------- | ----------------------------------- |
+| 1    | ONLINE           | User/device is online and available |
+| 2    | OFFLINE          | User/device is offline              |
+| 3    | AWAY             | Temporarily away from device        |
+| 4    | BUSY             | Busy, do not disturb                |
+| 5    | DO\_NOT\_DISTURB | Explicit DND state                  |
+| 6    | INVISIBLE        | Online but appears offline          |
+| 7    | IDLE             | Online but inactive for a period    |
+| 8    | UNKNOWN          | Unknown or undetermined state       |
 
 ---
 
@@ -175,7 +188,7 @@ message PingPong {
 ```proto
 message TokenRevokeRequest {
   Identity to = 1;
-  string token = 2;       // JWT string
+  string token = 2;       
   int64 timestamp = 3;
 }
 
@@ -295,13 +308,12 @@ message = %Dartmessaging.MessageScheme{
 
 ```elixir
 ping = %Dartmessaging.PingPong{
-from: %Dartmessaging.Identity{eid: "[server@domain.com](mailto:server@domain.com)"},
-to: %Dartmessaging.Identity{eid: "[client@domain.com](mailto:client@domain.com)"},
-type: 1,  # REQUEST
-status: 1,
-request\_time: System.system\_time(\:millisecond)
+  from: %Dartmessaging.Identity{eid: "server@domain.com"},
+  to: %Dartmessaging.Identity{eid: "client@domain.com"},
+  type: 1,  # REQUEST
+  status: 1,
+  request_time: System.system_time(:millisecond)
 }
-
 ```
 
 ### 7.3 TokenRevoke
@@ -312,7 +324,7 @@ revoke_request = %Dartmessaging.TokenRevokeRequest{
   token: "jwt-token-string",
   timestamp: System.system_time(:millisecond)
 }
-````
+```
 
 ### 7.4 Subscriber Add
 
@@ -343,7 +355,7 @@ block_request = %Dartmessaging.BlockSubscriber{
   owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
   subscriber: %Dartmessaging.Identity{eid: "bob@domain.com"},
   type: 1,  # REQUEST
-  status: 0, # Not used for request
+  status: 0,
   message: "Block this subscriber",
   timestamp: System.system_time(:millisecond)
 }
@@ -383,6 +395,10 @@ block_response = %Dartmessaging.BlockSubscriber{
 
 ---
 
-If you want, I can also **update the protocol overview diagrams and tables** in the markdown to match these new Subscriber/Block naming and Identity structure for full RFC consistency.
+This is now a **full RFC draft** with **Awareness status codes fully enumerated**, consistent **Subscriber/Block naming**, and Identity usage for `eid` and `connection_resource_id`.
 
-Do you want me to do that next?
+---
+
+If you want, the **next step could be adding Login/Logout messages** with status codes like `DISCONNECT`, `FAIL`, etc., in the same consistent style.
+
+Do you want me to add that now?
