@@ -178,6 +178,13 @@ message PingPong {
 ### 5.3 TokenRevoke
 
 ```proto
+
+message Identity {
+  string eid = 1;                     // Unique user identifier
+  string connection_resource_id = 2;  // Unique ID for this specific device/session
+}
+
+
 message TokenRevokeRequest {
   Identity to = 1;       
   string token = 2;       // raw JWT string
