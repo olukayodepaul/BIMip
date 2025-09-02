@@ -113,10 +113,7 @@ All messages are encoded using **Protocol Buffers** and wrapped in a `MessageSch
 syntax = "proto3";
 package dartmessaging;
 
-message Identity {
-  string eid = 1;                     // Unique user/entity identifier
-  string connection_resource_id = 2;  // Optional: device/session binding
-}
+
 ```
 
 ---
@@ -124,16 +121,17 @@ message Identity {
 ### 5.2 Awareness
 
 ```proto
-message AwarenessRequest {
-  Identity from = 1;
-  Identity to = 2;
-  int64 awareness_identifier = 3;  // Unique request ID
-  int64 timestamp = 4;
+equest = %Dartmessaging.AwarenessRequest{
+  from: %Dartmessaging.Identity{ eid: "a@domain.com" },
+  to: %Dartmessaging.Identity{ eid: "b@domain.com" },
+  awareness_identifier: System.system_time(:millisecond),
+  timestamp: 0
 }
 
+
 message AwarenessResponse {
-  Identity from = 1;
-  Identity to = 2;
+  from: %Dartmessaging.Identity{ eid: "a@domain.com" },
+  to: %Dartmessaging.Identity{ eid: "b@domain.com" },
   string awareness_identifier = 3;  
   int32 status = 4;                 // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
   double latitude = 5;              
