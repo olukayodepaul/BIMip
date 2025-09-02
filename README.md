@@ -105,8 +105,6 @@ All messages are wrapped in a `MessageScheme` **envelope** that contains a `rout
 
 ## 5. Protocol Buffers Definitions
 
-### 5.1 Awareness
-
 ```proto
 syntax = "proto3";
 package dartmessaging;
@@ -117,6 +115,8 @@ message Identity {
 }
 
 ```
+
+### 5.1 Awareness
 
 ```proto
 
