@@ -1,7 +1,3 @@
-Here’s your RFC draft fully updated in **Markdown** and with “Subscriber” replacing “Contact” where appropriate:
-
----
-
 # BIMip-Foundation (RFC-DRAFT)
 
 **Status:** Draft
@@ -49,7 +45,7 @@ The PingPong Protocol (PPG) provides a standardized mechanism to verify connecti
 
 The Token Revoke Protocol (TRP) defines a mechanism for logging out specific devices or all devices of a user using JWT-based authentication.
 
-Subscriber and Block protocols allow managing subscribers and blocking unwanted subscribers.
+Subscriber and Block protocols allow managing subscribers and blocking unwanted messages.
 
 Together, these form part of **BIMip (Binary Interface for Messaging & Internet Protocol).**
 
@@ -100,8 +96,8 @@ All messages are encoded using **Protocol Buffers** and wrapped in a `MessageSch
 
 ### 4.4 Subscriber Messages
 
-* `ContactAddRequest` – Add a subscriber.
-* `ContactAddResponse` – Response to addition.
+* `SubscriberAddRequest` – Add a subscriber.
+* `SubscriberAddResponse` – Response to addition.
 
 ### 4.5 Block Subscriber Messages
 
@@ -195,19 +191,19 @@ message TokenRevokeResponse {
 ### 5.5 Subscriber
 
 ```proto
-message ContactAddRequest {
+message SubscriberAddRequest {
   Identity owner = 1;
   Identity subscriber = 2;
   string nickname = 3;
   string group = 4;
-  string contact_resource_id = 5;
+  string subscriber_resource_id = 5;
   int64 timestamp = 6;
 }
 
-message ContactAddResponse {
+message SubscriberAddResponse {
   Identity owner = 1;
   Identity subscriber = 2;
-  string contact_resource_id = 3;
+  string subscriber_resource_id = 3;
   int32 status = 4;       // 1=SUCCESS, 2=FAILED
   string message = 5;
   int64 timestamp = 6;
@@ -258,8 +254,8 @@ message MessageScheme {
     PingPong pingpong_message = 6;
     TokenRevokeRequest token_revoke_request = 7;
     TokenRevokeResponse token_revoke_response = 8;
-    ContactAddRequest contact_add_request = 9;
-    ContactAddResponse contact_add_response = 10;
+    SubscriberAddRequest subscriber_add_request = 9;
+    SubscriberAddResponse subscriber_add_response = 10;
     BlockSubscriber block_subscriber = 11;
   }
 }
@@ -272,7 +268,7 @@ message MessageScheme {
 * **Awareness:** Requests must be answered; notifications may be sent proactively.
 * **PingPong:** REQUEST tests connectivity; RESPONSE echoes timestamps and status.
 * **TokenRevoke:** Servers must invalidate sessions immediately.
-* **Subscriber:** Responses must echo `contact_resource_id`.
+* **Subscriber:** Responses must echo `subscriber_resource_id`.
 * **BlockSubscriber:** REQUEST indicates block; RESPONSE confirms status.
 
 ---
@@ -283,7 +279,8 @@ message MessageScheme {
 
 ```elixir
 notification = %Dartmessaging.AwarenessNotification{
-  from: "alice@domain.com",
+  from: %Dartmessaging.Identity{eid: "alice@domain.com"},
+  to: %Dartmessaging.Identity{eid: "bob@domain.com"},
   last_seen: DateTime.to_unix(awareness.last_seen, :second),
   status: awareness.status
 }
@@ -297,14 +294,19 @@ message = %Dartmessaging.MessageScheme{
 ### 7.2 PingPong
 
 ```elixir
-ping = %Dartmessaging.PingPong{
-  from: "server@domain.com",
-  to: "client@domain.com",
-  type: 1,  # REQUEST
-  status: 1,
-  request_time: System.system_time(:millisecond)
-}
+ping = %Dartmessaging.PingP
 ```
+
+
+ong{
+from: %Dartmessaging.Identity{eid: "[server@domain.com](mailto:server@domain.com)"},
+to: %Dartmessaging.Identity{eid: "[client@domain.com](mailto:client@domain.com)"},
+type: 1,  # REQUEST
+status: 1,
+request\_time: System.system\_time(\:millisecond)
+}
+
+````
 
 ### 7.3 TokenRevoke
 
@@ -314,10 +316,77 @@ revoke_request = %Dartmessaging.TokenRevokeRequest{
   token: "jwt-token-string",
   timestamp: System.system_time(:millisecond)
 }
+````
+
+### 7.4 Subscriber Add
+
+```elixir
+subscriber_request = %Dartmessaging.SubscriberAddRequest{
+  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
+  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com", connection_resource_id: "conn-01"},
+  nickname: "Bobby",
+  group: "Friends",
+  subscriber_resource_id: "sub-123",
+  timestamp: System.system_time(:millisecond)
+}
+
+subscriber_response = %Dartmessaging.SubscriberAddResponse{
+  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
+  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com", connection_resource_id: "conn-01"},
+  subscriber_resource_id: "sub-123",
+  status: 1,  # SUCCESS
+  message: "Subscriber added successfully",
+  timestamp: System.system_time(:millisecond)
+}
+```
+
+### 7.5 Block Subscriber
+
+```elixir
+block_request = %Dartmessaging.BlockSubscriber{
+  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
+  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com"},
+  type: 1,  # REQUEST
+  status: 0, # Not used for request
+  message: "Block this subscriber",
+  timestamp: System.system_time(:millisecond)
+}
+
+block_response = %Dartmessaging.BlockSubscriber{
+  owner: %Dartmessaging.Identity{eid: "alice@domain.com"},
+  subscriber: %Dartmessaging.Identity{eid: "bob@domain.com"},
+  type: 2,  # RESPONSE
+  status: 1, # SUCCESS
+  message: "Subscriber blocked",
+  timestamp: System.system_time(:millisecond)
+}
 ```
 
 ---
 
-This version uses **“Subscriber”** terminology consistently in the headings, descriptions, and semantics.
+## 8. Security Considerations
 
-If you want, I can **also rename all proto messages from `ContactAddRequest/Response` to `SubscriberAddRequest/Response`** for full consistency with the RFC naming. Do you want me to do that next?
+* Authenticate awareness requests to prevent spoofing.
+* Share sensitive metadata (e.g., location) only with authorized parties.
+* Rate-limit notifications to prevent flooding.
+* Use TLS for all transport layers.
+
+---
+
+## 9. IANA Considerations
+
+* Introduces new namespaces: awareness, pingpong, subscriber.
+* No IANA registry actions required currently.
+
+---
+
+## 10. References
+
+* \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
+* \[RFC 2778] Instant Messaging / Presence Protocol Requirements, February 2000
+
+---
+
+If you want, I can also **update the protocol overview diagrams and tables** in the markdown to match these new Subscriber/Block naming and Identity structure for full RFC consistency.
+
+Do you want me to do that next?
