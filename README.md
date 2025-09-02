@@ -276,7 +276,7 @@ message MessageScheme {
 
 ### 5.9 Logout
 
-```
+```proto
 // Logout action
 message Logout {
   Identity entity = 1;      // The user/device performing logout
