@@ -120,18 +120,21 @@ message Identity {
 
 ```proto
 
+message Identity {
+  string eid = 1; // User/entity identifier
+}
 
 // AwarenessRequest: Query the awareness of another entity
 message AwarenessRequest {
-  string from = 1;                 // Requesting entity (EID)
-  string to = 2;                   // Target entity (EID)
+  Identity from = 1;                 // Requesting entity (EID)
+  Identity to = 2;                   // Target entity (EID)
   int64 awareness_identifier = 3;  // Unique request identifier (System.system_time(:millisecond))
   int64 timestamp = 4;             // Unix UTC timestamp (ms) of request
 }
 
 message AwarenessResponse {
-  string from = 1;                    // Responding entity (EID)
-  string to = 2;                      // Original requester (EID)
+  Identity from = 1;                    // Responding entity (EID)
+  Identity to = 2;                      // Original requester (EID)
   string awareness_identifier = 3;    // Must match AwarenessRequest.awareness_identifier
   int32 status = 4;                   // Awareness state: 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=DND, 5=BUSY, 6=INVISIBLE, 7=NOT_FOUND, 8=UNKNOWN
   double latitude = 5;                // Optional
@@ -192,6 +195,37 @@ message ErrorMessage {
   string message = 2;
   string route = 3;
   string details = 4;
+}
+
+```
+
+### 5.5 Add Contact
+
+```
+
+// Identity structure for user
+message Identity {
+  string eid = 1;          // User identifier
+}
+
+// Contact request
+message ContactAddRequest {
+  Identity owner = 1;            // The user who owns the contact
+  Identity subscriber = 2;       // The user being added as a contact
+  string nickname = 3;           // Optional nickname
+  string group = 4;              // Optional group/folder
+  string contact_resource_id = 5; // Unique ID to bind request and response
+  int64 timestamp = 6;           // For auditing/logging
+}
+
+// Contact response
+message ContactAddResponse {
+  Identity owner = 1;             // Owner of the contact
+  Identity subscriber = 2;        // The contact being added
+  string contact_resource_id = 3; // Echoed from request
+  int32 status = 4;               // 1 = SUCCESS, 2 = FAILED
+  string message = 5;             // Optional error or confirmation message
+  int64 timestamp = 6;            // For auditing/logging
 }
 
 ```
