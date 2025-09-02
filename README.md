@@ -144,8 +144,8 @@ message AwarenessResponse {
 }
 
 message AwarenessNotification {
-  string from = 1;                     // Entity whose awareness changed
-  string to = 2;                       // Target entity (EID)
+  Identity from = 1;                     // Entity whose awareness changed
+  Identity to = 2;                       // Target entity (EID)
   int32 status = 3;                     // Awareness state: 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=DND, 5=BUSY, 6=INVISIBLE, 7=NOT_FOUND, 8=UNKNOWN
   int64 last_seen = 4;                  // Unix UTC timestamp
   double latitude = 5;                  // Optional
