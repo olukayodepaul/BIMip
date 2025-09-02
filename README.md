@@ -159,9 +159,15 @@ message AwarenessNotification {
 ### 5.2 PingPong
 
 ```proto
+
+message Identity {
+  string eid = 1; // User/entity identifier
+}
+
+
 message PingPong {
-  string from = 1;          // Sender entity (EID)
-  string to = 2;            // Recipient entity (EID)
+  Identity from = 1;          // Sender entity (EID)
+  Identity to = 2;            // Recipient entity (EID)
   int64 type = 3;           // 1 = REQUEST, 2 = RESPONSE
   int64 status = 4;         // 1 = PENDING, 2 = SUCCESS, 3 = FAIL, 4 = TIMEOUT, 5 = BLOCKED, 6 = UNREACHABLE
   int64 request_time = 5;   // Unix UTC timestamp of request (ms)
