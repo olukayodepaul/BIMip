@@ -197,23 +197,37 @@ enum PingStatus {
 ### 5.3 TokenRevoke
 
 ```proto
-// Identity with optional device_eid
+// --------------------------
+// Identity of a user or device
+// --------------------------
 message Identity {
-  string eid = 1;           // User Epohai Identifier
+  string eid = 1;           // User Epohai Identifier (unique user ID)
   string device_eid = 2;    // Optional: specific device under the user
+                             // - If set, operations (like token revoke) target this device only
+                             // - If empty, operations may target all devices for this user
 }
 
+// --------------------------
 // Token revoke / logout message
+// --------------------------
 message TokenRevoke {
-  Identity to = 1;          // Target entity (user/device)
-  RevokeType type = 2;      // REQUEST = 1, RESPONSE = 2
-  int64 timestamp = 3;      // Unix UTC timestamp
+  Identity to = 1;          // Target entity (user or device) whose token is to be revoked
+                             // - Server uses this to locate and invalidate the token
+  RevokeType type = 2;      // Indicates the type of message:
+                             // - REQUEST: client initiates token revocation (logout)
+                             // - RESPONSE: server confirms token revocation
+  int64 timestamp = 3;      // Unix UTC timestamp of when the revoke request was made
+                             // - Useful for auditing, logging, and replay protection
 }
 
+// --------------------------
+// Type of token revoke message
+// --------------------------
 enum RevokeType {
   REQUEST = 1;  // Client initiates logout
   RESPONSE = 2; // Server confirms revocation
 }
+
 ```
 
 ### MessageScheme Envelope
