@@ -274,6 +274,18 @@ message MessageScheme {
 }
 ```
 
+### 5.9 Logout
+
+```
+// Logout action
+message Logout {
+  Identity entity = 1;      // The user/device performing logout
+  int32 type = 2;           // 1 = REQUEST, 2 = RESPONSE
+  int32 status = 3;         // 1 = DISCONNECT, 2 = FAIL, 3 = SUCCESS
+  int64 timestamp = 4;      // Unix UTC timestamp (ms) of the action
+}
+```
+
 ---
 
 ## 6. Semantics
