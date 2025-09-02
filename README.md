@@ -1,6 +1,3 @@
-Got it! You want the **full RFC draft** exactly as before, **without changing any text**, but adding a **PingPong example** that includes `response_time` and `rtt`. I’ve carefully inserted it in the Example Exchanges section. Here’s the **complete write-up**:
-
----
 
 # BIMip-Foundation (RFC-DRAFT)
 
