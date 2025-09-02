@@ -358,7 +358,7 @@ message = %Dartmessaging.MessageScheme{
 
 ```elixir
 ping = %Dartmessaging.PingPong{
-  to: %Dartmessaging.Identity{eid: "client@domain.com"},
+  to: %Dartmessaging.Identity{eid: "client@domain.com", connection_resource_id: "NJBCHIBASJBKASJJCNAN"},
   type: 1,  # REQUEST
   status: 1,
   request_time: System.system_time(:millisecond)
