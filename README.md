@@ -113,22 +113,22 @@ package dartmessaging;
 
 // AwarenessRequest: Query the awareness of another entity
 message AwarenessRequest {
-  string from = 1;
-  string to = 2;
-  int64 request_id = 3;
+  string from = 1;       // Requesting entity (EID)
+  string to = 2;         // Target entity (EID)
+  int64 awareness_identifier = 3;  // Unique request identifier
 }
 
-// AwarenessResponse: Reply to AwarenessRequest
+// Response to an AwarenessRequest
 message AwarenessResponse {
-  string from = 1;
-  string to = 2;
-  int64 request_id = 3;
+  string from = 1;        // Responding entity (EID)
+  string to = 2;          // Original requester (EID)
+  int64 awareness_identifier = 3;  // Must match AwarenessRequest.request_id
 
-  AwarenessStatus status = 4;
-  int64 last_seen = 5;
-  double latitude = 6;
-  double longitude = 7;
-  int32 awareness_intention = 8; // 1 = device/network, 2 = user override
+  AwarenessStatus status = 4;   // Awareness state
+  int64 last_seen = 5;          // Unix UTC timestamp
+  double latitude = 6;          // Optional: defaults to 0.0 if not set
+  double longitude = 7;         // Optional: defaults to 0.0 if not set
+  int32 awareness_intention = 8;// Optional: defaults to 0 if not set
 }
 
 // AwarenessNotification: Push notifications about awareness changes
