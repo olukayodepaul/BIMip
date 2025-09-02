@@ -369,7 +369,7 @@ ping = %Dartmessaging.PingPong{
 
 ```elixir
 revoke_request = %Dartmessaging.TokenRevokeRequest{
-  to: %Dartmessaging.Identity{eid: "user@domain.com"},
+  to: %Dartmessaging.Identity{eid: "client@domain.com", connection_resource_id: "NJBCHIBASJBKASJJCNAN"},
   token: "jwt-token-string",
   timestamp: System.system_time(:millisecond)
 }
