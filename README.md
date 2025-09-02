@@ -254,7 +254,7 @@ message ErrorMessage {
 ---
 
 
-### 5.9 Logout
+### 5.8 Logout
 
 
 ```proto
