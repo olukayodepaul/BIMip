@@ -253,26 +253,6 @@ message ErrorMessage {
 
 ---
 
-### 5.8 MessageScheme Envelope
-
-```proto
-message MessageScheme {
-  int64 route = 1;
-
-  oneof payload {
-    AwarenessNotification awareness_notification = 2;
-    AwarenessResponse awareness_response = 3;
-    AwarenessRequest awareness_request = 4;
-    ErrorMessage error_message = 5;
-    PingPong pingpong_message = 6;
-    TokenRevokeRequest token_revoke_request = 7;
-    TokenRevokeResponse token_revoke_response = 8;
-    SubscriberAddRequest subscriber_add_request = 9;
-    SubscriberAddResponse subscriber_add_response = 10;
-    BlockSubscriber block_subscriber = 11;
-  }
-}
-```
 
 ### 5.9 Logout
 
@@ -331,6 +311,28 @@ message = %Dartmessaging.MessageScheme{
 
 binary = Dartmessaging.MessageScheme.encode(message)
 send(state.ws_pid, {:binary, binary})
+```
+
+### 5.9 MessageScheme Envelope
+
+```proto
+message MessageScheme {
+  int64 route = 1;
+
+  oneof payload {
+    AwarenessNotification awareness_notification = 2;
+    AwarenessResponse awareness_response = 3;
+    AwarenessRequest awareness_request = 4;
+    ErrorMessage error_message = 5;
+    PingPong pingpong_message = 6;
+    TokenRevokeRequest token_revoke_request = 7;
+    TokenRevokeResponse token_revoke_response = 8;
+    SubscriberAddRequest subscriber_add_request = 9;
+    SubscriberAddResponse subscriber_add_response = 10;
+    BlockSubscriber block_subscriber = 11;
+    Logout logout = 12;
+  }
+}
 ```
 
 
