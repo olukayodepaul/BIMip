@@ -276,6 +276,7 @@ message MessageScheme {
 
 ### 5.9 Logout
 
+
 ```proto
 // Logout action
 message Logout {
@@ -285,6 +286,53 @@ message Logout {
   int64 timestamp = 4;      // Unix UTC timestamp (ms) of the action
 }
 ```
+
+**Notes:**
+
+* `entity` uses **Identity** (eid + optional connection\_resource\_id)
+* `type` distinguishes **REQUEST** (client wants to logout) from **RESPONSE** (server confirms or fails)
+* `status` shows the result of the logout attempt
+* `timestamp` ensures auditable/loggable action
+
+
+### Example Usage
+
+```elixir
+# Client initiates logout request
+logout_req = %Dartmessaging.Logout{
+  entity: %Dartmessaging.Identity{eid: "user@domain.com", connection_resource_id: "device123"},
+  type: 1,    # REQUEST
+  status: 1,  # DISCONNECT
+  timestamp: System.system_time(:millisecond)
+}
+
+message = %Dartmessaging.MessageScheme{
+  route: 12,  # new route for Logout
+  payload: {:logout, logout_req}
+}
+
+binary = Dartmessaging.MessageScheme.encode(message)
+send(state.ws_pid, {:binary, binary})
+```
+
+```elixir
+# Server responds
+logout_resp = %Dartmessaging.Logout{
+  entity: %Dartmessaging.Identity{eid: "user@domain.com", connection_resource_id: "device123"},
+  type: 2,    # RESPONSE
+  status: 3,  # SUCCESS
+  timestamp: System.system_time(:millisecond)
+}
+
+message = %Dartmessaging.MessageScheme{
+  route: 12,
+  payload: {:logout, logout_resp}
+}
+
+binary = Dartmessaging.MessageScheme.encode(message)
+send(state.ws_pid, {:binary, binary})
+```
+
 
 ---
 
