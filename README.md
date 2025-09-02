@@ -214,7 +214,7 @@ message ErrorMessage {
 
 ### 5.5 Add Contact
 
-```
+```proto
 
 // Identity structure for user
 message Identity {
