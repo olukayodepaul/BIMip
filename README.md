@@ -245,7 +245,7 @@ message ContactAddResponse {
 
 ### Block Subscriber 5.6
 
-```
+```proto
 // Identity structure for user/entity
 message Identity {
   string eid = 1; // User/entity identifier
