@@ -178,7 +178,7 @@ enum RevokeType {
 
 ### 5.4  Error
 
-```
+```proto
 // Standardized error message
 message ErrorMessage {
   int32 code = 1;
