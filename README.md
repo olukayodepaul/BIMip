@@ -277,6 +277,7 @@ message BlockSubscriber {
 // 8 -> TokenRevokeResponse
 // 9 -> ContactAddRequest
 // 10 -> ContactAddResponse
+// 11 -> BlockSubscriber 
 
 // MessageScheme: Envelope for routing multiple schemas
 message MessageScheme {
@@ -292,6 +293,7 @@ message MessageScheme {
     TokenRevokeResponse token_revoke_response = 8;
     ContactAddRequest contact_add_request = 9;
     ContactAddResponse contact_add_response = 10;
+    BlockSubscriber block_subscriber = 11;
   }
 }
 ```
