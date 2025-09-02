@@ -111,6 +111,16 @@ All messages are wrapped in a `MessageScheme` **envelope** that contains a `rout
 syntax = "proto3";
 package dartmessaging;
 
+message Identity {
+  string eid = 1;                     // Unique user identifier
+  string connection_resource_id = 2;  // Unique ID for this specific device/session
+}
+
+```
+
+```proto
+
+
 // AwarenessRequest: Query the awareness of another entity
 message AwarenessRequest {
   string from = 1;                 // Requesting entity (EID)
