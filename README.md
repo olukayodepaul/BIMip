@@ -1,8 +1,12 @@
-# BIMip-Foundation (RFC-DRAFT) 
+Here’s your RFC draft fully updated in **Markdown** and with “Subscriber” replacing “Contact” where appropriate:
 
-**Status:** Draft  
-**Category:** Standards Track  
-**Author:** Paul Aigokhai Olukayode  
+---
+
+# BIMip-Foundation (RFC-DRAFT)
+
+**Status:** Draft
+**Category:** Standards Track
+**Author:** Paul Aigokhai Olukayode
 **Created:** 2025-08-30
 
 ---
@@ -13,20 +17,22 @@
 2. [Terminology](#2-terminology)
 3. [Protocol Overview](#3-protocol-overview)
 4. [Message Types](#4-message-types)
-   - [4.1 Awareness Messages](#41-awareness-messages)
-   - [4.2 PingPong Messages](#42-pingpong-messages)
-   - [4.3 Token Revoke Messages](#43-token-revoke-messages)
-   - [4.4 Contact Messages](#44-contact-messages)
-   - [4.5 Block Subscriber Messages](#45-block-subscriber-messages)
+
+   * [4.1 Awareness Messages](#41-awareness-messages)
+   * [4.2 PingPong Messages](#42-pingpong-messages)
+   * [4.3 Token Revoke Messages](#43-token-revoke-messages)
+   * [4.4 Subscriber Messages](#44-subscriber-messages)
+   * [4.5 Block Subscriber Messages](#45-block-subscriber-messages)
 5. [Protocol Buffers Definitions](#5-protocol-buffers-definitions)
-   - [5.1 Identity](#51-identity)
-   - [5.2 Awareness](#52-awareness)
-   - [5.3 PingPong](#53-pingpong)
-   - [5.4 TokenRevoke](#54-tokenrevoke)
-   - [5.5 Contact](#55-contact)
-   - [5.6 BlockSubscriber](#56-blocksubscriber)
-   - [5.7 Error](#57-error)
-   - [5.8 MessageScheme Envelope](#58-messagescheme-envelope)
+
+   * [5.1 Identity](#51-identity)
+   * [5.2 Awareness](#52-awareness)
+   * [5.3 PingPong](#53-pingpong)
+   * [5.4 TokenRevoke](#54-tokenrevoke)
+   * [5.5 Subscriber](#55-subscriber)
+   * [5.6 BlockSubscriber](#56-blocksubscriber)
+   * [5.7 Error](#57-error)
+   * [5.8 MessageScheme Envelope](#58-messagescheme-envelope)
 6. [Semantics](#6-semantics)
 7. [Example Exchanges](#7-example-exchanges)
 8. [Security Considerations](#8-security-considerations)
@@ -37,13 +43,13 @@
 
 ## 1. Introduction
 
-The Awareness Protocol (AWP) defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.  
+The Awareness Protocol (AWP) defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.
 
 The PingPong Protocol (PPG) provides a standardized mechanism to verify connectivity between entities, measure latency, and detect lost connections.
 
 The Token Revoke Protocol (TRP) defines a mechanism for logging out specific devices or all devices of a user using JWT-based authentication.
 
-Contact and Block protocols allow managing contacts and blocking unwanted subscribers.
+Subscriber and Block protocols allow managing subscribers and blocking unwanted subscribers.
 
 Together, these form part of **BIMip (Binary Interface for Messaging & Internet Protocol).**
 
@@ -51,12 +57,12 @@ Together, these form part of **BIMip (Binary Interface for Messaging & Internet 
 
 ## 2. Terminology
 
-- **Epohai Identifier (EID):** Unique identifier for a user, e.g., `alice@domain.com`.  
-- **Device EID:** Identifier for a specific device under a user EID.  
-- **Requester:** Entity asking about awareness or connectivity.  
-- **Responder:** Entity providing awareness or ping response.  
-- **Notification:** Proactive awareness update sent without request.  
-- **Route:** Logical identifier in the wrapper indicating which payload schema is carried.  
+* **Epohai Identifier (EID):** Unique identifier for a user, e.g., `alice@domain.com`.
+* **Device EID:** Identifier for a specific device under a user EID.
+* **Requester:** Entity asking about awareness or connectivity.
+* **Responder:** Entity providing awareness or ping response.
+* **Notification:** Proactive awareness update sent without request.
+* **Route:** Logical identifier in the wrapper indicating which payload schema is carried.
 
 ---
 
@@ -64,11 +70,11 @@ Together, these form part of **BIMip (Binary Interface for Messaging & Internet 
 
 Primary message categories:
 
-- **Awareness Messages:** Query or notify awareness state.  
-- **PingPong Messages:** Verify connectivity and latency.  
-- **Token Revoke Messages:** Revoke JWT-based sessions.  
-- **Contact Messages:** Add/remove contacts.  
-- **Block Subscriber Messages:** Block a subscriber from sending messages or notifications.  
+* **Awareness Messages:** Query or notify awareness state.
+* **PingPong Messages:** Verify connectivity and latency.
+* **Token Revoke Messages:** Revoke JWT-based sessions.
+* **Subscriber Messages:** Add/remove subscribers.
+* **Block Subscriber Messages:** Block a subscriber from sending messages or notifications.
 
 All messages are encoded using **Protocol Buffers** and wrapped in a `MessageScheme` envelope containing a `route` and a `oneof payload`.
 
@@ -78,28 +84,28 @@ All messages are encoded using **Protocol Buffers** and wrapped in a `MessageSch
 
 ### 4.1 Awareness Messages
 
-- `AwarenessRequest` – Query awareness state.  
-- `AwarenessResponse` – Return awareness state.  
-- `AwarenessNotification` – Proactive updates.
+* `AwarenessRequest` – Query awareness state.
+* `AwarenessResponse` – Return awareness state.
+* `AwarenessNotification` – Proactive updates.
 
 ### 4.2 PingPong Messages
 
-- `PingPong REQUEST` – Verify connectivity.  
-- `PingPong RESPONSE` – Reply indicating success/failure.  
+* `PingPong REQUEST` – Verify connectivity.
+* `PingPong RESPONSE` – Reply indicating success/failure.
 
 ### 4.3 Token Revoke Messages
 
-- `TokenRevoke REQUEST` – Initiates logout.  
-- `TokenRevoke RESPONSE` – Confirms revocation.  
+* `TokenRevoke REQUEST` – Initiates logout.
+* `TokenRevoke RESPONSE` – Confirms revocation.
 
-### 4.4 Contact Messages
+### 4.4 Subscriber Messages
 
-- `ContactAddRequest` – Add a contact.  
-- `ContactAddResponse` – Response to addition.  
+* `ContactAddRequest` – Add a subscriber.
+* `ContactAddResponse` – Response to addition.
 
 ### 4.5 Block Subscriber Messages
 
-- `BlockSubscriber` – Request/response to block a subscriber.  
+* `BlockSubscriber` – Request/response to block a subscriber.
 
 ---
 
@@ -115,7 +121,7 @@ message Identity {
   string eid = 1;                     // Unique user/entity identifier
   string connection_resource_id = 2;  // Optional: device/session binding
 }
-
+```
 
 ---
 
@@ -186,7 +192,7 @@ message TokenRevokeResponse {
 
 ---
 
-### 5.5 Contact
+### 5.5 Subscriber
 
 ```proto
 message ContactAddRequest {
@@ -266,7 +272,7 @@ message MessageScheme {
 * **Awareness:** Requests must be answered; notifications may be sent proactively.
 * **PingPong:** REQUEST tests connectivity; RESPONSE echoes timestamps and status.
 * **TokenRevoke:** Servers must invalidate sessions immediately.
-* **Contact:** Responses must echo `contact_resource_id`.
+* **Subscriber:** Responses must echo `contact_resource_id`.
 * **BlockSubscriber:** REQUEST indicates block; RESPONSE confirms status.
 
 ---
@@ -308,5 +314,10 @@ revoke_request = %Dartmessaging.TokenRevokeRequest{
   token: "jwt-token-string",
   timestamp: System.system_time(:millisecond)
 }
-``
 ```
+
+---
+
+This version uses **“Subscriber”** terminology consistently in the headings, descriptions, and semantics.
+
+If you want, I can **also rename all proto messages from `ContactAddRequest/Response` to `SubscriberAddRequest/Response`** for full consistency with the RFC naming. Do you want me to do that next?
