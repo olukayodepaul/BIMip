@@ -113,7 +113,10 @@ All messages are encoded using **Protocol Buffers** and wrapped in a `MessageSch
 syntax = "proto3";
 package dartmessaging;
 
-
+message Identity {
+  string eid = 1;                      // Unique user identifier
+  string connection_resource_id = 2;   // Optional: device/session binding
+}
 ```
 
 ---
@@ -121,34 +124,46 @@ package dartmessaging;
 ### 5.2 Awareness
 
 ```proto
-message AwarenessRequest = %Dartmessaging.AwarenessRequest{
-  from: %Dartmessaging.Identity{ eid: "a@domain.com" },
-  to: %Dartmessaging.Identity{ eid: "b@domain.com" },
-  awareness_identifier: System.system_time(:millisecond),
-  timestamp: 0
+syntax = "proto3";
+package dartmessaging;
+
+// Identity for a user/device
+message Identity {
+  string eid = 1;                      // Unique user identifier
+  string connection_resource_id = 2;   // Optional: device/session binding
 }
 
+// Awareness request
+message AwarenessRequest {
+  Identity from = 1;
+  Identity to = 2;
+  int64 awareness_identifier = 3;      // Unique request ID (timestamp or generated)
+  int64 timestamp = 4;                 // Optional: Unix timestamp (ms)
+}
 
+// Awareness response
 message AwarenessResponse {
-  from: %Dartmessaging.Identity{ eid: "a@domain.com" },
-  to: %Dartmessaging.Identity{ eid: "b@domain.com" },
-  string awareness_identifier = 3;  
-  int32 status = 4;                 // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
-  double latitude = 5;              
-  double longitude = 6;             
-  int32 awareness_intention = 7;    
-  int64 timestamp = 8;
+  Identity from = 1;
+  Identity to = 2;
+  string awareness_identifier = 3;     // Must match request
+  int32 status = 4;                    // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
+  double latitude = 5;                 // Optional location
+  double longitude = 6;                // Optional location
+  int32 awareness_intention = 7;       // Optional: user's intention
+  int64 timestamp = 8;                 // Optional: Unix timestamp (ms)
 }
 
+// Awareness notification (proactive updates)
 message AwarenessNotification {
   Identity from = 1;
   Identity to = 2;
-  int32 status = 3;                 // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
-  int64 last_seen = 4;
-  double latitude = 5;
-  double longitude = 6;
-  int32 awareness_intention = 7;
+  int32 status = 3;                    // 1=ONLINE, 2=OFFLINE, 3=AWAY, 4=BUSY, 5=DO_NOT_DISTURB, 6=INVISIBLE, 7=IDLE, 8=UNKNOWN
+  int64 last_seen = 4;                 // Unix timestamp (ms)
+  double latitude = 5;                 // Optional
+  double longitude = 6;                // Optional
+  int32 awareness_intention = 7;       // Optional
 }
+
 ```
 
 **Awareness Status Codes:**
