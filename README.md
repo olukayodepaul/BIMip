@@ -124,14 +124,6 @@ message Identity {
 ### 5.2 Awareness
 
 ```proto
-syntax = "proto3";
-package dartmessaging;
-
-// Identity for a user/device
-message Identity {
-  string eid = 1;                      // Unique user identifier
-  string connection_resource_id = 2;   // Optional: device/session binding
-}
 
 // Awareness request
 message AwarenessRequest {
