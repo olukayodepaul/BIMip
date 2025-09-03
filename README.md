@@ -1,62 +1,48 @@
-## BIMip-Foundation Messaging Protocol Specification
+### BIMip-Foundation Messaging Protocol Specification
 
 **Status:** Draft
 **Category:** Standards Track
 **Author:** Paul Aigokhai Olukayode
 **Created:** 2025-08-30
 
----
+-----
 
 ### Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Terminology](#2-terminology)
-3. [Protocol Overview](#3-protocol-overview)
-4. [Message Types](#4-message-types)
-    4.1 [Awareness Messages](#41-awareness-messages)
-    4.2 [PingPong Messages](#42-pingpong-messages)
-    4.3 [Token Revoke Messages](#43-token-revoke-messages)
-    4.4 [Subscriber Messages](#44-subscriber-messages)
-    4.5 [Block Subscriber Messages](#45-block-subscriber-messages)
-    4.6 [Logout Messages](#46-logout-messages)
-    4.7 [Error Messages](#47-error-messages)
-    4.8 [Chat Messaging](#48-chat-messaging)
-5. [Protocol Buffers Definitions](#5-protocol-buffers-definitions)
-    5.1 [Identity](#51-identity)
-    5.2 [Awareness](#52-awareness)
-    5.3 [PingPong](#53-pingpong)
-    5.4 [Token Revoke](#54-token-revoke)
-    5.5 [Subscriber](#55-subscriber)
-    5.6 [Block Subscriber](#56-block-subscriber)
-    5.7 [Logout](#57-logout)
-    5.8 [Error](#58-error)
-    5.9 [Chat Messaging](#59-chat-messaging)
-     5.9.1 [Payload Requests](#591-payload-requests)
-     5.9.2 [Canonical ChatMessage](#592-canonical-chatmessage)
-     5.9.3 [Acknowledgment Flow](#593-acknowledgment-flow)
-    5.10 [Version Updates](#510-version-updates)
-    5.11 [MessageScheme Envelope](#511-messagescheme-envelope)
-6. [Semantics](#6-semantics)
-7. [Status & Type Tables](#7-status--type-tables)
-8. [Example Exchanges](#8-example-exchanges)
-    8.1 [Awareness Example](#81-awareness-example)
-    8.2 [PingPong Example](#82-pingpong-example)
-    8.3 [Token Revoke Example](#83-token-revoke-example)
-    8.4 [Chat Messaging Examples](#84-chat-messaging-examples)
-     8.4.1 [Sending a Text Message](#841-sending-a-text-message)
-     8.4.2 [Server Sends ChatMessage to Receiver](#842-server-sends-chatmessage-to-receiver)
-     8.4.3 [Receiver Sends Acknowledgment](#843-receiver-sends-acknowledgment)
-9. [Security Considerations](#9-security-considerations)
-10. [IANA Considerations](#10-iana-considerations)
-11. [References](#11-references)
-
-
----
-
-If you want, I can also **update all the section headers themselves** to match these exact anchors, so the links work perfectly on GitHub or other Markdown viewers.
-
-Do you want me to do that next?
-
+1.  [Introduction](https://www.google.com/search?q=%231-introduction)
+2.  [Terminology](https://www.google.com/search?q=%232-terminology)
+3.  [Protocol Overview](https://www.google.com/search?q=%233-protocol-overview)
+4.  [Message Types](https://www.google.com/search?q=%234-message-types)
+      * [4.1 Awareness Messages](https://www.google.com/search?q=%2341-awareness-messages)
+      * [4.2 PingPong Messages](https://www.google.com/search?q=%2342-pingpong-messages)
+      * [4.3 Token Revoke Messages](https://www.google.com/search?q=%2343-token-revoke-messages)
+      * [4.4 Subscriber Messages](https://www.google.com/search?q=%2344-subscriber-messages)
+      *   * [4.5 Block Subscriber Messages](https://www.google.com/search?q=%2345-block-subscriber-messages)
+      * [4.6 Logout Messages](https://www.google.com/search?q=%2346-logout-messages)
+      * [4.7 Error Messages](https://www.google.com/search?q=%2347-error-messages)
+      * [4.8 Chat Messaging](https://www.google.com/search?q=%2348-chat-messaging)
+5.  [Protocol Buffers Definitions](https://www.google.com/search?q=%235-protocol-buffers-definitions)
+      * [5.1 Identity](https://www.google.com/search?q=%2351-identity)
+      * [5.2 Awareness](https://www.google.com/search?q=%2352-awareness)
+      * [5.3 PingPong](https://www.google.com/search?q=%2353-pingpong)
+      * [5.4 Token Revoke](https://www.google.com/search?q=%2354-token-revoke)
+      * [5.5 Subscriber](https://www.google.com/search?q=%2355-subscriber)
+      * [5.6 Block Subscriber](https://www.google.com/search?q=%2356-block-subscriber)
+      * [5.7 Logout](https://www.google.com/search?q=%2357-logout)
+      * [5.8 Error](https://www.google.com/search?q=%2358-error)
+      * [5.9 Chat Messaging](https://www.google.com/search?q=%2359-chat-messaging)
+      * [5.10 Version Updates](https://www.google.com/search?q=%23510-version-updates)
+      * [5.11 MessageScheme Envelope](https://www.google.com/search?q=%23511-messagescheme-envelope)
+6.  [Semantics](https://www.google.com/search?q=%236-semantics)
+7.  [Status & Type Tables](https://www.google.com/search?q=%237-status--type-tables)
+8.  [Example Exchanges](https://www.google.com/search?q=%238-example-exchanges)
+      * [8.1 Awareness Example](https://www.google.com/search?q=%2381-awareness-example)
+      * [8.2 PingPong Example](https://www.google.com/search?q=%2382-pingpong-example)
+      * [8.3 Token Revoke Example](https://www.google.com/search?q=%2383-token-revoke-example)
+      * [8.4 Chat Messaging Examples](https://www.google.com/search?q=%2384-chat-messaging-examples)
+9.  [Security Considerations](https://www.google.com/search?q=%239-security-considerations)
+10. [IANA Considerations](https://www.google.com/search?q=%2310-iana-considerations)
+11. [References](https://www.google.com/search?q=%2311-references)
 
 -----
 
