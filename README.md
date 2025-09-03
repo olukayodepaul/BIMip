@@ -1,176 +1,146 @@
-# BIMip-Foundation (RFC-DRAFT) 👍
+## BIMip-Foundation Messaging Protocol Specification
 
 **Status:** Draft
 **Category:** Standards Track
 **Author:** Paul Aigokhai Olukayode
 **Created:** 2025-08-30
 
----
+-----
 
-## Table of Contents
+### Table of Contents
 
-1. [Introduction](#1-introduction)
+1.  Introduction
+2.  Terminology
+3.  Protocol Overview
+4.  Message Types
+    4.1. Awareness Messages
+    4.2. PingPong Messages
+    4.3. Token Revoke Messages
+    4.4. Subscriber Messages
+    4.5. Block Subscriber Messages
+    4.6. Logout Messages
+    4.7. Error Messages
+    4.8. Chat Messaging
+5.  Protocol Buffers Definitions
+    5.1. Identity
+    5.2. Awareness
+    5.3. PingPong
+    5.4. Token Revoke
+    5.5. Subscriber
+    5.6. Block Subscriber
+    5.7. Logout
+    5.8. Error
+    5.9. Chat Messaging
+    5.10. Version Updates
+    5.11. MessageScheme Envelope
+6.  Semantics
+7.  Status & Type Tables
+8.  Example Exchanges
+    8.1. Awareness Example
+    8.2. PingPong Example
+    8.3. Token Revoke Example
+    8.4. Chat Messaging Examples
+9.  Security Considerations
+10. IANA Considerations
+11. References
 
-2. [Terminology](#2-terminology)
+-----
 
-3. [Protocol Overview](#3-protocol-overview)
+### 1\. Introduction
 
-4. [Message Types](#4-message-types)
+This document specifies the messaging protocol for communication between clients and the server, defining how text messages, media messages, acknowledgments, and version updates are structured and exchanged.
 
-   * [4.1 Awareness Messages](#41-awareness-messages)
-   * [4.2 PingPong Messages](#42-pingpong-messages)
-   * [4.3 Token Revoke Messages](#43-token-revoke-messages)
-   * [4.4 Subscriber Messages](#44-subscriber-messages)
-   * [4.5 Block Subscriber Messages](#45-block-subscriber-messages)
-   * [4.6 Logout Messages](#46-logout-messages)
-   * [4.7 Error Messages](#47-error-messages)
-   * [4.8 Chat Messaging](#48-chat-messaging)
+The **Awareness Protocol (AWP)** defines a lightweight message-based system for communicating user and device presence ("awareness") between entities. The **PingPong Protocol (PPG)** provides a mechanism to verify connectivity between devices and servers, measure latency, and detect lost connections. The **Token Revoke Protocol (TRP)** provides JWT-based session revocation and logout management. **Subscriber** and **Block Subscriber** protocols manage user access and communication control. The **Chat Messaging Protocol (CMP)** provides 1:1 user-to-user message exchange, supporting text and media payloads, with acknowledgment tracking for delivery and read status. All protocols are part of **BIMip (Binary Interface for Messaging & Internet Protocol)**, optimized for internal service and mobile-backend communication.
 
-5. [Protocol Buffers Definitions](#5-protocol-buffers-definitions)
+-----
 
-   * [5.1 Identity](#51-identity)
-   * [5.2 Awareness](#52-awareness)
-   * [5.3 PingPong](#53-pingpong)
-   * [5.4 TokenRevoke](#54-tokenrevoke)
-   * [5.5 Subscriber](#55-subscriber)
-   * [5.6 BlockSubscriber](#56-blocksubscriber)
-   * [5.7 Logout](#57-logout)
-   * [5.8 Error](#58-error)
-   * [5.9 Chat Messaging](#59-chat-messaging)
-   * [5.10 MessageScheme Envelope](#510-messagescheme-envelope)
+### 2\. Terminology
 
-6. [Semantics](#6-semantics)
+  * **Epohai Identifier (EID):** Unique user identifier (e.g., `alice@domain.com`).
+  * **Device EID:** Identifier for a specific device under a user EID.
+  * **Requester:** Entity asking about awareness or connectivity.
+  * **Responder:** Entity providing awareness or ping response.
+  * **Notification:** Proactive awareness update sent without a request.
+  * **Route:** Logical identifier in the `MessageScheme` envelope indicating the payload schema.
 
-7. [Status & Type Tables](#7-status--type-tables)
+-----
 
-8. [Example Exchanges](#8-example-exchanges)
-
-9. [Security Considerations](#9-security-considerations)
-
-10. [IANA Considerations](#10-iana-considerations)
-
-11. [References](#11-references)
-
----
-
-## 1. Introduction
-
-The **Awareness Protocol (AWP)** defines a lightweight message-based system for communicating user and device presence ("awareness") between entities.
-
-The **PingPong Protocol (PPG)** provides a mechanism to verify connectivity between devices and servers, measure latency, and detect lost connections.
-
-The **Token Revoke Protocol (TRP)** provides JWT-based session revocation and logout management.
-
-**Subscriber** and **Block Subscriber** protocols manage user access and communication control.
-
-The **Chat Messaging Protocol (CMP)** provides 1:1 user-to-user message exchange, supporting text and media payloads, with acknowledgment tracking for delivery and read status.
-
-All protocols are part of **BIMip (Binary Interface for Messaging & Internet Protocol)**, optimized for internal service and mobile-backend communication.
-
----
-
-## 2. Terminology
-
-* **Epohai Identifier (EID):** Unique user identifier (e.g., `alice@domain.com`).
-* **Device EID:** Identifier for a specific device under a user EID.
-* **Requester:** Entity asking about awareness or connectivity.
-* **Responder:** Entity providing awareness or ping response.
-* **Notification:** Proactive awareness update sent without request.
-* **Route:** Logical identifier in the `MessageScheme` envelope indicating the payload schema.
-
----
-
-## 3. Protocol Overview
+### 3\. Protocol Overview
 
 Primary message categories:
 
-* **Awareness Messages:** Query or notify user/device awareness state.
-* **PingPong Messages:** Verify device-to-server connectivity.
-* **Token Revoke Messages:** Logout/revoke device sessions.
-* **Subscriber Messages:** Add/remove subscribers.
-* **Block Subscriber Messages:** Block unwanted communication.
-* **Logout Messages:** Disconnect a device/session.
-* **Error Messages:** Standardized error reporting.
-* **Chat Messaging:** 1:1 text and media exchange with acknowledgment.
+  * **Awareness Messages:** Query or notify user/device awareness state.
+  * **PingPong Messages:** Verify device-to-server connectivity.
+  * **Token Revoke Messages:** Logout/revoke device sessions.
+  * **Subscriber Messages:** Add/remove subscribers.
+  * **Block Subscriber Messages:** Block unwanted communication.
+  * **Logout Messages:** Disconnect a device/session.
+  * **Error Messages:** Standardized error reporting.
+  * **Chat Messaging:** 1:1 text and media exchange with acknowledgment.
 
-All messages use **Protocol Buffers** and are wrapped in a `MessageScheme` envelope.
+All messages use **Protocol Buffers** and are wrapped in a `MessageScheme` envelope for routing.
 
----
+-----
 
-## 4. Message Types
+### 4\. Message Types
 
-### 4.1 Awareness Messages
+#### 4.1 Awareness Messages
 
-* **AwarenessRequest** – Query another user/device for their current presence/status.
-* **AwarenessResponse** – Reply to AwarenessRequest with status, location, and intention.
-* **AwarenessNotification** – Proactively notify other users/devices of awareness state.
+  * **AwarenessRequest** – Query another user/device for their current presence/status.
+  * **AwarenessResponse** – Reply to `AwarenessRequest` with status, location, and intention.
+  * **AwarenessNotification** – Proactively notify other users/devices of awareness state.
 
----
+#### 4.2 PingPong Messages
 
-### 4.2 PingPong Messages
+  * **PingPong REQUEST** – Device → Server connectivity check.
+  * **PingPong RESPONSE** – Server → Device response with latency/status.
 
-* **PingPong REQUEST** – Device → Server connectivity check.
-* **PingPong RESPONSE** – Server → Device response with latency/status.
+#### 4.3 Token Revoke Messages
 
----
+  * **TokenRevokeRequest** – Initiates logout for specific devices or all devices of a user.
+  * **TokenRevokeResponse** – Confirms whether revocation succeeded.
 
-### 4.3 Token Revoke Messages
+#### 4.4 Subscriber Messages
 
-* **TokenRevokeRequest** – Initiates logout for specific devices or all devices of a user.
-* **TokenRevokeResponse** – Confirms whether revocation succeeded.
+  * **SubscriberAddRequest** – Request to add a subscriber under a user.
+  * **SubscriberAddResponse** – Confirms addition with status and resource ID.
 
----
+#### 4.5 Block Subscriber Messages
 
-### 4.4 Subscriber Messages
+  * **BlockSubscriber REQUEST** – Request to block a subscriber.
+  * **BlockSubscriber RESPONSE** – Confirms status of the block.
 
-* **SubscriberAddRequest** – Request to add a subscriber under a user.
-* **SubscriberAddResponse** – Confirms addition with status and resource ID.
+#### 4.6 Logout Messages
 
----
+  * **Logout REQUEST** – Client/device requests logout/disconnect.
+  * **Logout RESPONSE** – Server confirms logout status.
 
-### 4.5 Block Subscriber Messages
+#### 4.7 Error Messages
 
-* **BlockSubscriber REQUEST** – Request to block a subscriber.
-* **BlockSubscriber RESPONSE** – Confirms status of the block.
+  * **ErrorMessage** – Protocol-level errors (invalid requests, schema mismatches, or authorization failures).
 
----
+#### 4.8 Chat Messaging
 
-### 4.6 Logout Messages
+  * **TextPayloadRequest** – A text message request with metadata.
+  * **MediaPayloadRequest** – A media message request with URLs and metadata.
+  * **ChatMessage** – The canonical message entity sent to receivers and stored as a copy by the sender.
+  * **AcknowledgmentRequest/Response** – Used by sender/receiver to confirm message status.
+  * **VersionUpdate** - Used when the server assigns or updates version numbers.
 
-* **Logout REQUEST** – Client/device requests logout/disconnect.
-* **Logout RESPONSE** – Server confirms logout status.
+-----
 
----
+### 5\. Protocol Buffers Definitions
 
-### 4.7 Error Messages
-
-* **ErrorMessage** – Protocol-level errors (invalid requests, schema mismatches, or authorization failures).
-
----
-
-### 4.8 Chat Messaging
-
-* **TextPayloadRequest** – A text message request with metadata.
-* **MediaPayloadRequest** – A media message request with URLs and metadata.
-* **AcknowledgmentRequest/Response** – Used by sender/receiver to confirm status.
-* **ChatMessage** – Canonical stored message entity containing payload, author, and acknowledgment.
-
----
-
-## 5. Protocol Buffers Definitions
-
-### 5.1 Identity
+#### 5.1 Identity
 
 ```proto
 message Identity {
-  string eid = 1;
-  string connection_resource_id = 2;
+  string eid                     = 1;  // user or device identifier (e.g. "a@domain.com")
+  string connection_resource_id  = 2;  // optional client session or connection ID
 }
 ```
 
----
-
-### 5.2 Awareness
+#### 5.2 Awareness
 
 ```proto
 message AwarenessRequest {
@@ -202,9 +172,7 @@ message AwarenessNotification {
 }
 ```
 
----
-
-### 5.3 PingPong
+#### 5.3 PingPong
 
 ```proto
 message PingPong {
@@ -217,31 +185,27 @@ message PingPong {
 }
 ```
 
----
-
-### 5.4 TokenRevoke
+#### 5.4 Token Revoke
 
 ```proto
 message TokenRevokeRequest {
   Identity to = 1;
   string token = 2;
-  int32 type = 3;       // 1=REQUEST, 2=RESPONSE
+  int32 type = 3;        // 1=REQUEST, 2=RESPONSE
   int64 timestamp = 4;
   int64 rtt = 5;
 }
 
 message TokenRevokeResponse {
   Identity to = 1;
-  int32 status = 2;     // 1=SUCCESS, 2=FAILED
-  int32 type = 3;       // 1=REQUEST, 2=RESPONSE
+  int32 status = 2;      // 1=SUCCESS, 2=FAILED
+  int32 type = 3;        // 1=REQUEST, 2=RESPONSE
   int64 timestamp = 4;
   int64 rtt = 5;
 }
 ```
 
----
-
-### 5.5 Subscriber
+#### 5.5 Subscriber
 
 ```proto
 message SubscriberAddRequest {
@@ -263,9 +227,7 @@ message SubscriberAddResponse {
 }
 ```
 
----
-
-### 5.6 BlockSubscriber
+#### 5.6 Block Subscriber
 
 ```proto
 message BlockSubscriber {
@@ -278,22 +240,18 @@ message BlockSubscriber {
 }
 ```
 
----
-
-### 5.7 Logout
+#### 5.7 Logout
 
 ```proto
 message Logout {
   Identity entity = 1;
-  int32 type = 2;     
+  int32 type = 2;
   int32 status = 3;
   int64 timestamp = 4;
 }
 ```
 
----
-
-### 5.8 Error
+#### 5.8 Error
 
 ```proto
 message ErrorMessage {
@@ -304,30 +262,36 @@ message ErrorMessage {
 }
 ```
 
----
+#### 5.9 Chat Messaging
 
-### 5.9 Chat Messaging
+##### 5.9.1 Payload Requests
 
-### 5.9.1 Outgoing Request (from sender → server)
+Payload requests are client-initiated messages sent to either the messaging server or the CDN server.
 
-Sender creates a **TextPayloadRequest** or **MediaPayloadRequest** and sends to the server:
+// **TextPayloadRequest**
 
 ```proto
 message TextPayloadRequest {
-  Identity from           = 1; // sender (EID + resource)
-  repeated Identity to    = 2; // one or more receivers
+  Identity from           = 1;
+  repeated Identity to    = 2;
   string content          = 3;
-  string message_id_local = 4; // temporary client ID
-  string text_size_count  = 5; // length of text
-  int64 created_at        = 6; // client timestamp
+  string message_id_local = 4;
+  string text_size_count  = 5;
+  int64 created_at        = 6;
 }
+```
 
+Sent by the client when submitting a text message.
+
+// **MediaPayloadRequest**
+
+```proto
 message MediaPayloadRequest {
-  Identity from           = 1; // sender
-  repeated Identity to    = 2; // receivers
+  Identity from           = 1;
+  repeated Identity to    = 2;
   string message_id_local = 3;
-  string chat_id          = 4; // conversation ID
-  int32  type             = 5; // 1=image, 2=audio, 3=video, 4=file
+  string chat_id          = 4;
+  int32  type             = 5;  // 1=image | 2=audio | 3=video | 4=file
   string caption          = 6;
   string thumbnail_url    = 7;
   string cdn_url_id       = 8;
@@ -336,19 +300,17 @@ message MediaPayloadRequest {
 }
 ```
 
----
+Sent to the CDN server for handling media uploads and metadata.
 
-### 5.9.2 Server Conversion (canonical ChatMessage)
+##### 5.9.2 Canonical ChatMessage
 
-The server receives the request, generates `message_id` and `version`, and wraps it in a **ChatMessage**.
-
-This same **ChatMessage** object is delivered back to **both sender and receiver(s)**, but with some **field differences**.
+This message represents a chat message that is sent to the receiver(s) and also kept as a copy by the sender for local storage and synchronization.
 
 ```proto
 message ChatMessage {
   string message_id       = 1;  // server-assigned global ID
   string message_id_local = 2;  // client temporary ID
-  int64  version          = 3;  // server-assigned chat sequence (monotonic per chat_id)
+  int64  version          = 3;  // server-assigned chat sequence
   string chat_id          = 4;  // conversation ID
   Identity from           = 5;  // message sender
   repeated Identity to    = 6;  // message receivers
@@ -360,7 +322,7 @@ message ChatMessage {
   }
 
   // Acknowledgment status codes:
-  // Sender view:   4=sent (initial), 2=delivered, 3=read
+  // Sender view:    4=sent (initial), 2=delivered, 3=read
   // Receiver view: 1=unread (initial), 2=delivered, 3=read
   int32 acknowledgment            = 10;
   int64 acknowledgment_timestamp  = 11;
@@ -370,45 +332,73 @@ message ChatMessage {
 }
 ```
 
----
+**Sender copy:** Keeps message with `author = "sender"`, `acknowledgment = 4` (sent).
+**Receiver copy:** Receives message with `author = "receiver"`, `acknowledgment = 1` (unread).
 
-### 5.9.3  Sender’s Copy
+##### 5.9.3 Acknowledgment Flow
 
-When the **sender** receives the `ChatMessage` back from the server:
+Acknowledgments are exchanged to track delivery and read states between sender and receiver.
 
-* `author = "sender"`
-* `acknowledgment = 4 (sent)`
-* `version` is filled in by server (monotonic sequence for this chat)
-
----
-
-### 5.9.4 Receiver’s Copy
-
-When the **receiver** receives the `ChatMessage` from the server:
-
-* `author = "receiver"`
-* `acknowledgment = 1 (unread)`
-* `version` is the same as sender’s (so both sides share consistent ordering)
-
----
-
-### 5.9.5 Acknowledgment Flow
-
-Receiver updates acknowledgment by sending an **AcknowledgmentRequest**:
+// **AcknowledgmentRequest**
 
 ```proto
 message AcknowledgmentRequest {
-  Identity from     = 1; // receiver
-  Identity to       = 2; // sender
+  Identity from     = 1;  // sending client or receiving client depending on flow
+  Identity to       = 2;  // original sender or receiver
   string message_id = 3;
-  int32 status      = 4; // 2=delivered, 3=read
-  int64 timestamp   = 5;
+
+  // Status codes:
+  // Sender side: 1=unread | 2=delivered | 3=read
+  // Receiver side: 4=sent (initial) | 2=delivered | 3=read
+  int32  status     = 4;
+  int64  timestamp  = 5;  // time of acknowledgment
 }
 ```
 
----
+// **AcknowledgmentResponse**
 
-### 5.10 MessageScheme Envelope
+```proto
+message AcknowledgmentResponse {
+  Identity from     = 1;  // sender/receiver depending on flow
+  Identity to       = 2;  // receiver/sender depending on flow
+  string message_id = 3;
+
+  // Status codes:
+  // Sender side: 1=unread | 2=delivered | 3=read
+  // Receiver side: 4=sent (initial) | 2=delivered | 3=read
+  int32  status     = 4;
+  int64  timestamp  = 5;  // time of acknowledgment
+}
+```
+
+#### 5.10 Version Updates
+
+Used when the server assigns or updates version numbers.
+
+// **VersionUpdate**
+
+```proto
+message VersionUpdate {
+  Identity to           = 1;  // original sender or receiver
+  string message_id     = 2;
+  string message_id_local = 3;  // client temporary ID
+  int32 type            = 4;   // 1 = REQUEST, 2 = RESPONSE
+  int64 timestamp       = 5;
+  int32 status          = 6;   // 1 = sent, 2 = updated
+}
+```
+
+**Flow:**
+
+1.  Server sends `VersionUpdate` (REQUEST) to sender with assigned version.
+2.  Sender updates local copy and replies with `VersionUpdate` (RESPONSE).
+3.  Server then pushes `ChatMessage` with version to receivers.
+
+#### 5.11 MessageScheme Envelope
+
+All payloads are wrapped in the `MessageScheme` envelope for routing.
+
+// **MessageScheme**
 
 ```proto
 message MessageScheme {
@@ -435,67 +425,67 @@ message MessageScheme {
 }
 ```
 
----
+-----
 
-## 6. Semantics
+### 6\. Semantics
 
-* All requests must include a valid `Identity` for both `from` and `to`.
-* `timestamp` fields are Unix time in milliseconds.
-* `status` codes vary per message type and must follow defined tables.
-* `MessageScheme` route identifiers are used to multiplex payloads.
-* Chat messages are **1:1 only**; group support is out of scope.
+  * All requests must include a valid `Identity` for both `from` and `to`.
+  * `timestamp` fields are Unix time in milliseconds.
+  * `status` codes vary per message type and must follow defined tables.
+  * `MessageScheme` route identifiers are used to multiplex payloads.
+  * Chat messages are **1:1 only**; group support is out of scope.
 
----
+-----
 
-## 7. Status & Type Tables
+### 7\. Status & Type Tables
 
 **PingPong Status Codes**
 
-| Status | Meaning     |
+| Status | Meaning |
 | ------ | ----------- |
-| 1      | PENDING     |
-| 2      | OK          |
-| 3      | FAIL        |
-| 4      | TIMEOUT     |
-| 5      | ERROR       |
-| 6      | UNREACHABLE |
+| 1 | PENDING |
+| 2 | OK |
+| 3 | FAIL |
+| 4 | TIMEOUT |
+| 5 | ERROR |
+| 6 | UNREACHABLE |
 
 **PingPong Type Codes**
 
-| Type | Meaning  |
+| Type | Meaning |
 | ---- | -------- |
-| 1    | REQUEST  |
-| 2    | RESPONSE |
+| 1 | REQUEST |
+| 2 | RESPONSE |
 
 **TokenRevoke Type Codes**
 
-| Type | Meaning  |
+| Type | Meaning |
 | ---- | -------- |
-| 1    | REQUEST  |
-| 2    | RESPONSE |
+| 1 | REQUEST |
+| 2 | RESPONSE |
 
 **Logout Status Codes**
 
-| Status | Meaning                        |
-| ------ | ------------------------------ |
-| 1      | DISCONNECT – Client disconnect |
-| 2      | FAIL – Logout failed           |
-| 3      | SUCCESS – Logout succeeded     |
+| Status | Meaning |
+| ------ | ---------------- |
+| 1 | DISCONNECT – Client disconnect |
+| 2 | FAIL – Logout failed |
+| 3 | SUCCESS – Logout succeeded |
 
 **Chat Acknowledgment Codes**
 
-| Status | Meaning                       |
+| Status | Meaning |
 | ------ | ----------------------------- |
-| 1      | UNREAD (sender-side)          |
-| 2      | DELIVERED (both sides)        |
-| 3      | READ (both sides)             |
-| 4      | SENT (receiver initial state) |
+| 1 | UNREAD (sender-side) |
+| 2 | DELIVERED (both sides) |
+| 3 | READ (both sides) |
+| 4 | SENT (receiver initial state) |
 
----
+-----
 
-## 8. Example Exchanges
+### 8\. Example Exchanges
 
-### Awareness Example
+#### 8.1 Awareness Example
 
 ```elixir
 req = %Dartmessaging.AwarenessRequest{
@@ -506,7 +496,7 @@ req = %Dartmessaging.AwarenessRequest{
 }
 ```
 
-### PingPong Example
+#### 8.2 PingPong Example
 
 ```elixir
 request_time = System.system_time(:millisecond)
@@ -528,7 +518,7 @@ ping_response = %Dartmessaging.PingPong{
 }
 ```
 
-### Token Revoke Example
+#### 8.3 Token Revoke Example
 
 ```elixir
 request_time = System.system_time(:millisecond)
@@ -549,7 +539,13 @@ revoke_response = %Dartmessaging.TokenRevokeResponse{
 }
 ```
 
-### Chat Messaging Example
+#### 8.4 Chat Messaging Examples
+
+**Example 1: Sending a Text Message**
+
+  * Sender → Server
+
+<!-- end list -->
 
 ```elixir
 # Sender creates a text message
@@ -561,8 +557,15 @@ msg = %Dartmessaging.TextPayloadRequest{
   text_size_count: "8",
   created_at: System.system_time(:millisecond)
 }
+```
 
-# Server wraps into ChatMessage
+**Example 2: Server Sends ChatMessage to Receiver**
+
+  * Server wraps into ChatMessage
+
+<!-- end list -->
+
+```elixir
 chat = %Dartmessaging.ChatMessage{
   message_id: "srv-456",
   message_id_local: msg.message_id_local,
@@ -576,8 +579,15 @@ chat = %Dartmessaging.ChatMessage{
   created_at: msg.created_at,
   server_received_at: System.system_time(:millisecond)
 }
+```
 
-# Receiver acknowledges delivery
+**Example 3: Receiver Sends Acknowledgment**
+
+  * Receiver acknowledges delivery
+
+<!-- end list -->
+
+```elixir
 ack = %Dartmessaging.AcknowledgmentRequest{
   from: %Dartmessaging.Identity{eid: "bob@domain.com"},
   to: msg.from,
@@ -587,27 +597,26 @@ ack = %Dartmessaging.AcknowledgmentRequest{
 }
 ```
 
----
+-----
 
-## 9. Security Considerations
+### 9\. Security Considerations
 
-* Authenticate awareness requests to prevent spoofing.
-* Share sensitive metadata (e.g., location) only with authorized parties.
-* Rate-limit notifications to prevent flooding.
-* Use TLS for all transport layers.
-* Chat messages must be encrypted end-to-end where applicable.
+  * Authenticate awareness requests to prevent spoofing.
+  * Share sensitive metadata (e.g., location) only with authorized parties.
+  * Rate-limit notifications to prevent flooding.
+  * Use TLS for all transport layers.
+  * Chat messages must be encrypted end-to-end where applicable.
 
----
+-----
 
-## 10. IANA Considerations
+### 10\. IANA Considerations
 
-* Introduces new namespaces: awareness, pingpong, subscriber, logout, chat.
-* No IANA registry actions required currently.
+  * Introduces new namespaces: awareness, pingpong, subscriber, logout, chat.
+  * No IANA registry actions required currently.
 
----
+-----
 
-## 11. References
+### 11\. References
 
-* \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
-* \[RFC 2778] Instant Messaging / Presence Protocol Requirements, February 2000
-
+  * [RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
+  * [RFC 2778] Instant Messaging / Presence Protocol Requirements, February 2000
