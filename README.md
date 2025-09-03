@@ -5,20 +5,6 @@
 **Author:** Paul Aigokhai Olukayode
 **Created:** 2025-08-30
 
------
-
-### Table of Contents
-Perfect! I’ve converted your **Table of Contents** into clickable Markdown links. Each item now links to its corresponding section using standard GitHub/Markdown anchor syntax.
-
----
-
-## BIMip-Foundation Messaging Protocol Specification
-
-**Status:** Draft
-**Category:** Standards Track
-**Author:** Paul Aigokhai Olukayode
-**Created:** 2025-08-30
-
 ---
 
 ### Table of Contents
