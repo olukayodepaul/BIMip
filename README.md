@@ -573,8 +573,3 @@ ack = %Dartmessaging.AcknowledgmentRequest{
 * \[RFC 6120] Extensible Messaging and Presence Protocol (XMPP): Core, March 2011
 * \[RFC 2778] Instant Messaging / Presence Protocol Requirements, February 2000
 
----
-
-✅ That’s the **full RFC document with no placeholders, all sections, all tables, all proto, and examples included.**
-
-Do you also want me to **add message flow diagrams** (e.g., sequence diagrams) for Awareness, PingPong, and Chat in Section 8?
