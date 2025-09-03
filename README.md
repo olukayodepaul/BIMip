@@ -8,41 +8,68 @@
 -----
 
 ### Table of Contents
+Perfect! I’ve converted your **Table of Contents** into clickable Markdown links. Each item now links to its corresponding section using standard GitHub/Markdown anchor syntax.
 
-1.  Introduction
-2.  Terminology
-3.  Protocol Overview
-4.  Message Types
-    4.1. Awareness Messages
-    4.2. PingPong Messages
-    4.3. Token Revoke Messages
-    4.4. Subscriber Messages
-    4.5. Block Subscriber Messages
-    4.6. Logout Messages
-    4.7. Error Messages
-    4.8. Chat Messaging
-5.  Protocol Buffers Definitions
-    5.1. Identity
-    5.2. Awareness
-    5.3. PingPong
-    5.4. Token Revoke
-    5.5. Subscriber
-    5.6. Block Subscriber
-    5.7. Logout
-    5.8. Error
-    5.9. Chat Messaging
-    5.10. Version Updates
-    5.11. MessageScheme Envelope
-6.  Semantics
-7.  Status & Type Tables
-8.  Example Exchanges
-    8.1. Awareness Example
-    8.2. PingPong Example
-    8.3. Token Revoke Example
-    8.4. Chat Messaging Examples
-9.  Security Considerations
-10. IANA Considerations
-11. References
+---
+
+## BIMip-Foundation Messaging Protocol Specification
+
+**Status:** Draft
+**Category:** Standards Track
+**Author:** Paul Aigokhai Olukayode
+**Created:** 2025-08-30
+
+---
+
+### Table of Contents
+
+1. [Introduction](#1-introduction)
+2. [Terminology](#2-terminology)
+3. [Protocol Overview](#3-protocol-overview)
+4. [Message Types](#4-message-types)
+   4.1 [Awareness Messages](#41-awareness-messages)
+   4.2 [PingPong Messages](#42-pingpong-messages)
+   4.3 [Token Revoke Messages](#43-token-revoke-messages)
+   4.4 [Subscriber Messages](#44-subscriber-messages)
+   4.5 [Block Subscriber Messages](#45-block-subscriber-messages)
+   4.6 [Logout Messages](#46-logout-messages)
+   4.7 [Error Messages](#47-error-messages)
+   4.8 [Chat Messaging](#48-chat-messaging)
+5. [Protocol Buffers Definitions](#5-protocol-buffers-definitions)
+   5.1 [Identity](#51-identity)
+   5.2 [Awareness](#52-awareness)
+   5.3 [PingPong](#53-pingpong)
+   5.4 [Token Revoke](#54-token-revoke)
+   5.5 [Subscriber](#55-subscriber)
+   5.6 [Block Subscriber](#56-block-subscriber)
+   5.7 [Logout](#57-logout)
+   5.8 [Error](#58-error)
+   5.9 [Chat Messaging](#59-chat-messaging)
+   5.9.1 [Payload Requests](#591-payload-requests)
+   5.9.2 [Canonical ChatMessage](#592-canonical-chatmessage)
+   5.9.3 [Acknowledgment Flow](#593-acknowledgment-flow)
+   5.10 [Version Updates](#510-version-updates)
+   5.11 [MessageScheme Envelope](#511-messagescheme-envelope)
+6. [Semantics](#6-semantics)
+7. [Status & Type Tables](#7-status--type-tables)
+8. [Example Exchanges](#8-example-exchanges)
+   8.1 [Awareness Example](#81-awareness-example)
+   8.2 [PingPong Example](#82-pingpong-example)
+   8.3 [Token Revoke Example](#83-token-revoke-example)
+   8.4 [Chat Messaging Examples](#84-chat-messaging-examples)
+   8.4.1 [Sending a Text Message](#841-sending-a-text-message)
+   8.4.2 [Server Sends ChatMessage to Receiver](#842-server-sends-chatmessage-to-receiver)
+   8.4.3 [Receiver Sends Acknowledgment](#843-receiver-sends-acknowledgment)
+9. [Security Considerations](#9-security-considerations)
+10. [IANA Considerations](#10-iana-considerations)
+11. [References](#11-references)
+
+---
+
+If you want, I can also **update all the section headers themselves** to match these exact anchors, so the links work perfectly on GitHub or other Markdown viewers.
+
+Do you want me to do that next?
+
 
 -----
 
