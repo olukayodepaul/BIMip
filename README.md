@@ -308,63 +308,101 @@ message ErrorMessage {
 
 ### 5.9 Chat Messaging
 
+### 5.9.1 Outgoing Request (from sender → server)
+
+Sender creates a **TextPayloadRequest** or **MediaPayloadRequest** and sends to the server:
+
 ```proto
 message TextPayloadRequest {
-  Identity from = 1;
-  repeated Identity to = 2;
-  string content = 3;
-  string message_id_local = 4;
-  string text_size_count = 5;
-  int64 created_at = 6;
+  Identity from           = 1; // sender (EID + resource)
+  repeated Identity to    = 2; // one or more receivers
+  string content          = 3;
+  string message_id_local = 4; // temporary client ID
+  string text_size_count  = 5; // length of text
+  int64 created_at        = 6; // client timestamp
 }
 
 message MediaPayloadRequest {
-  Identity from = 1;
-  repeated Identity to = 2;
+  Identity from           = 1; // sender
+  repeated Identity to    = 2; // receivers
   string message_id_local = 3;
-  string chat_id = 4;
-  int32 type = 5;  // 1=image | 2=audio | 3=video | 4=file
-  string caption = 6;
-  string thumbnail_url = 7;
-  string cdn_url_id = 8;
-  int64 media_size_bytes = 9;
-  int64 created_at = 10;
+  string chat_id          = 4; // conversation ID
+  int32  type             = 5; // 1=image, 2=audio, 3=video, 4=file
+  string caption          = 6;
+  string thumbnail_url    = 7;
+  string cdn_url_id       = 8;
+  int64 media_size_bytes  = 9;
+  int64 created_at        = 10;
 }
+```
 
-message AcknowledgmentRequest {
-  Identity from = 1;
-  Identity to = 2;
-  string message_id = 3;
-  int32 status = 4;  
-  int64 timestamp = 5;
-}
+---
 
-message AcknowledgmentResponse {
-  Identity from = 1;
-  Identity to = 2;
-  string message_id = 3;
-  int32 status = 4;
-  int64 timestamp = 5;
-}
+### 5.9.2 Server Conversion (canonical ChatMessage)
 
+The server receives the request, generates `message_id` and `version`, and wraps it in a **ChatMessage**.
+
+This same **ChatMessage** object is delivered back to **both sender and receiver(s)**, but with some **field differences**.
+
+```proto
 message ChatMessage {
-  string message_id = 1;
-  string message_id_local = 2;
-  int64 version = 3;
-  string chat_id = 4;
-  Identity from = 5;
-  repeated Identity to = 6;
-  string author = 7;
+  string message_id       = 1;  // server-assigned global ID
+  string message_id_local = 2;  // client temporary ID
+  int64  version          = 3;  // server-assigned chat sequence (monotonic per chat_id)
+  string chat_id          = 4;  // conversation ID
+  Identity from           = 5;  // message sender
+  repeated Identity to    = 6;  // message receivers
+  string author           = 7;  // "sender" or "receiver"
 
   oneof payload {
-    string text = 8;
-    string media_url = 9;
+    string text       = 8;
+    string media_url  = 9;  // CDN links
   }
 
-  int32 acknowledgment = 10;
-  int64 acknowledgment_timestamp = 11;
-  int64 created_at = 12;
-  int64 server_received_at = 13;
+  // Acknowledgment status codes:
+  // Sender view:   4=sent (initial), 2=delivered, 3=read
+  // Receiver view: 1=unread (initial), 2=delivered, 3=read
+  int32 acknowledgment            = 10;
+  int64 acknowledgment_timestamp  = 11;
+
+  int64 created_at                = 12; // client-side creation
+  int64 server_received_at        = 13; // server timestamp
+}
+```
+
+---
+
+### 5.9.3  Sender’s Copy
+
+When the **sender** receives the `ChatMessage` back from the server:
+
+* `author = "sender"`
+* `acknowledgment = 4 (sent)`
+* `version` is filled in by server (monotonic sequence for this chat)
+
+---
+
+### 5.9.4 Receiver’s Copy
+
+When the **receiver** receives the `ChatMessage` from the server:
+
+* `author = "receiver"`
+* `acknowledgment = 1 (unread)`
+* `version` is the same as sender’s (so both sides share consistent ordering)
+
+---
+
+### 5.9.5 Acknowledgment Flow
+
+Receiver updates acknowledgment by sending an **AcknowledgmentRequest**:
+
+```proto
+message AcknowledgmentRequest {
+  Identity from     = 1; // receiver
+  Identity to       = 2; // sender
+  string message_id = 3;
+  int32 status      = 4; // 2=delivered, 3=read
+  int64 timestamp   = 5;
 }
 ```
 
