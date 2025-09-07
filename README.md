@@ -243,12 +243,16 @@ message BlockSubscriber {
 #### 5.7 Logout
 
 ```proto
+// ---------------- LogoutMessage ----------------
+// Uses both eid and connection_resource_id to log out a specific device
 message Logout {
-  Identity entity = 1;
-  int32 type = 2;
-  int32 status = 3;
-  int64 timestamp = 4;
+  Identity to = 1;      // The user/device performing logout
+  int32 type = 2;           // 1 = REQUEST, 2 = RESPONSE
+  int32 status = 3;         // 1 = DISCONNECT, 2 = FAIL, 3 = SUCCESS, 4 = PENDING
+  int64 timestamp = 4;      // Unix UTC timestamp (ms) of the action
 }
+
+// -
 ```
 
 #### 5.8 Error
