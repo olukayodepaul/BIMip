@@ -111,7 +111,7 @@ message MessagePeerAckSignal {
 | **`method`** | `int32` | The method or action related to the ACK (e.g., delivered, read, requested offset). |
 | **`timestamp`** | `int64` | Time the acknowledgment was generated (server time recommended). |
 | **`status_code`** | `int32` | **HTTP-like status code** (e.g., 200 for OK, 400 for Failure). |
-| **`peer`** | `Peer` | **CRITICAL:** Contains the server-generated stream offsets (`offset` and `peer_offset`) required for the sender to synchronize its local stream state. |
+| **`peer`** | `Peer` | **CRITICAL:** Contains the server-generated stream offsets (`offset` and `peer_offset`) required for the sender/receiver to synchronize its local stream state. |
 
 -----
 
