@@ -29,8 +29,6 @@ message Identity {
 
 -----
 
------
-
 ## 📩 2. Message
 
 The `Message` is the core data transfer object, encapsulating content, security, and routing metadata.
@@ -67,8 +65,6 @@ message Message {
 
 -----
 
------
-
 ## 🤝 3. Peer
 
 The `Peer` message carries synchronization information vital for stream management and reliability, typically populated by the server.
@@ -88,8 +84,6 @@ message Peer {
 | **`to`** | `string` | The **base ID** (`eid`) of the message recipient in the context of the stream. |
 | **`offset`** | `int64` | The **server-assigned global stream ID** of the current message or synchronization point. |
 | **`peer_offset`** | `int64` | The **last acknowledged offset** of the opposing peer's stream, crucial for flow control and reliability. |
-
------
 
 -----
 
