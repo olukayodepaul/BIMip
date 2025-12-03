@@ -5,11 +5,11 @@
 [![Build Status](https://github.com/phoenixframework/phoenix/workflows/CI/badge.svg)](https://github.com/phoenixframework/phoenix/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/phoenix.svg)](https://hex.pm/packages/phoenix) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/phoenix)
 
 
-# 📚 Core Messaging Protocol Documentation
+## 📚 Core Messaging Protocol Documentation
 
 This section details the Protocol Buffer definitions for the primary communication and synchronization structures.
 
-## 🔑 1. Identity
+### 🔑 1. Identity
 
 The `Identity` message defines a fully addressable entity within the system, allowing for targeted routing to a user's account, specific device, or hosting server node.
 
@@ -29,7 +29,7 @@ message Identity {
 
 -----
 
-## 📩 2. Message
+### 📩 2. Message
 
 The `Message` is the core data transfer object, encapsulating content, security, and routing metadata.
 
@@ -65,7 +65,7 @@ message Message {
 
 -----
 
-## 🤝 3. Peer
+### 🤝 3. Peer
 
 The `Peer` message carries synchronization information vital for stream management and reliability, typically populated by the server.
 
@@ -87,7 +87,7 @@ message Peer {
 
 -----
 
-## ✅ 4. MessagePeerAckSignal
+### ✅ 4. MessagePeerAckSignal
 
 The `MessagePeerAckSignal` is the acknowledgment mechanism used by the system. It is sent back to the original message sender to confirm delivery, update status, and convey critical, server-generated stream synchronization data.
 
@@ -117,7 +117,7 @@ message MessagePeerAckSignal {
 
 Would you like to review this documentation or perhaps define the status codes you plan to use for the `MessagePeerAckSignal`?
 
-## Copyright and License
+### Copyright and License
 
 Copyright (c) 2014, Chris McCord.
 
