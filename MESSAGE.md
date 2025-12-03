@@ -117,6 +117,9 @@ hex    = Base.encode16(binary, case: :upper)
 ### JavaScript / Node.js
 
 ```javascript
+const protobuf = require("protobufjs");
+const { MessageScheme, Message, Identity } = require("./compiled_protos"); // generated JS protobuf
+
 const payloadJson = {
   data: "This is the test message",
   emoji: "👋",
@@ -124,68 +127,134 @@ const payloadJson = {
 };
 
 const encryptedPayload = encryptForRecipient(JSON.stringify(payloadJson), recipientKey);
+const signature = sign(encryptedPayload, senderPrivateKey);
 
-const message = new Message({
-  messageId: "e2e123456",
+const request = Message.create({
+  messageId: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
   from: { eid: "a@domain.com", connectionResourceId: "device-abc123" },
   to: { eid: "b@domain.com" },
   timestamp: Date.now(),
-  payload: Buffer.from([]),
+  payload: Buffer.from([]), // empty because encrypted is used
   encryptionType: "E2E",
   encrypted: encryptedPayload,
-  signature: sign(encryptedPayload, senderPrivateKey),
+  signature: signature,
   type: 1,
   transmissionMode: 2
 });
+
+const message = MessageScheme.create({
+  route: 6,
+  payload: { message: request }
+});
+
+const binary = MessageScheme.encode(message).finish();
+const hex = Buffer.from(binary).toString("hex").toUpperCase();
+
+console.log("Binary:", binary);
+console.log("Hex:", hex);
+
 ```
 
 ### Java
 
 ```java
-Message message = Message.newBuilder()
-    .setMessageId("e2e123456")
-    .setFrom(Identity.newBuilder()
-        .setEid("a@domain.com")
-        .setConnectionResourceId("device-abc123")
-        .build())
-    .setTo(Identity.newBuilder()
-        .setEid("b@domain.com")
-        .build())
+import com.google.protobuf.ByteString;
+
+Message request = Message.newBuilder()
+    .setMessageId("vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI")
+    .setFrom(Identity.newBuilder().setEid("a@domain.com").setConnectionResourceId("device-abc123").build())
+    .setTo(Identity.newBuilder().setEid("b@domain.com").build())
     .setTimestamp(System.currentTimeMillis())
-    .setPayload(ByteString.EMPTY)
+    .setPayload(ByteString.EMPTY) // empty since encrypted is used
     .setEncryptionType("E2E")
     .setEncrypted(encryptedPayload)
     .setSignature(signature)
     .setType(1)
     .setTransmissionMode(2)
     .build();
+
+MessageScheme message = MessageScheme.newBuilder()
+    .setRoute(6)
+    .setPayload(MessageScheme.Payload.newBuilder().setMessage(request).build())
+    .build();
+
+byte[] binary = message.toByteArray();
+String hex = javax.xml.bind.DatatypeConverter.printHexBinary(binary);
+
+System.out.println("Binary length: " + binary.length);
+System.out.println("Hex: " + hex);
+
 ```
 
 ### Kotlin
 
 ```kotlin
-val message = Message.newBuilder()
-    .setMessageId("e2e123456")
-    .setFrom(Identity.newBuilder()
-        .setEid("a@domain.com")
-        .setConnectionResourceId("device-abc123")
-        .build())
-    .setTo(Identity.newBuilder()
-        .setEid("b@domain.com")
-        .build())
+import com.google.protobuf.ByteString
+
+val request = Message.newBuilder()
+    .setMessageId("vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI")
+    .setFrom(Identity.newBuilder().setEid("a@domain.com").setConnectionResourceId("device-abc123").build())
+    .setTo(Identity.newBuilder().setEid("b@domain.com").build())
     .setTimestamp(System.currentTimeMillis())
-    .setPayload(ByteString.EMPTY)
+    .setPayload(ByteString.EMPTY) // empty since encrypted is used
     .setEncryptionType("E2E")
     .setEncrypted(encryptedPayload)
     .setSignature(signature)
     .setType(1)
     .setTransmissionMode(2)
     .build()
+
+val message = MessageScheme.newBuilder()
+    .setRoute(6)
+    .setPayload(MessageScheme.Payload.newBuilder().setMessage(request).build())
+    .build()
+
+val binary = message.toByteArray()
+val hex = binary.joinToString("") { "%02X".format(it) }
+
+println("Binary length: ${binary.size}")
+println("Hex: $hex")
+
 ```
 
 ### Dart
 
 ```dart
+import 'dart:typed_data';
+import 'package:fixnum/fixnum.dart';
+import 'generated/message.pb.dart'; // your compiled protobufs
+
+final payloadJson = {
+  "data": "This is the test message",
+  "emoji": "👋",
+  "cdn_url": "www.dcn_dart/jbdchdbachbajds/image.png"
+};
+
+final encryptedPayload = encryptForRecipient(jsonEncode(payloadJson), recipientKey);
+
+final request = Message(
+  messageId: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
+  from: Identity(eid: "a@domain.com", connectionResourceId: "device-abc123"),
+  to: Identity(eid: "b@domain.com"),
+  timestamp: Int64(DateTime.now().millisecondsSinceEpoch),
+  payload: Uint8List(0), // empty since encrypted is used
+  encryptionType: "E2E",
+  encrypted: encryptedPayload,
+  signature: signature,
+  type: 1,
+  transmissionMode: 2,
+);
+
+final message = MessageScheme(
+  route: 6,
+  payload: MessageScheme_Payload(message: request),
+);
+
+final binary = message.writeToBuffer();
+final hex = binary.map((b) => b.toRadixString(16).padLeft(2, '0')).join().toUpperCase();
+
+print("Binary length: ${binary.length}");
+print("Hex: $hex");
 final payloadJson = {
   "data": "This is the test message",
   "emoji": "👋",
@@ -211,24 +280,30 @@ final message = Message(
 ### Swift
 
 ```swift
-let payloadJson: [String: Any] = [
-    "data": "This is the test message",
-    "emoji": "👋",
-    "cdn_url": "www.dcn_dart/jbdchdbachbajds/image.png"
-]
+import Foundation
 
-let encryptedPayload = encryptForRecipient(payloadJson, recipientKey)
-
-let message = Message.with {
-    $0.messageId = "e2e123456"
+let request = Message.with {
+    $0.messageId = "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI"
     $0.from = Identity.with { $0.eid = "a@domain.com"; $0.connectionResourceId = "device-abc123" }
     $0.to = Identity.with { $0.eid = "b@domain.com" }
     $0.timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-    $0.payload = Data()
+    $0.payload = Data() // empty since encrypted is used
     $0.encryptionType = "E2E"
     $0.encrypted = encryptedPayload
     $0.signature = signature
     $0.type = 1
     $0.transmissionMode = 2
 }
+
+let message = MessageScheme.with {
+    $0.route = 6
+    $0.payload = MessageScheme.Payload.with { $0.message = request }
+}
+
+let binary = try! message.serializedData()
+let hex = binary.map { String(format: "%02X", $0) }.joined()
+
+print("Binary length: \(binary.count)")
+print("Hex: \(hex)")
+
 ```
