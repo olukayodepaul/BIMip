@@ -23,7 +23,7 @@ message MessagePeerAckSignal {
 | **1** | `to` | `Identity` | The **original message sender** (who receives this ACK). | Routing |
 | **2** | `from` | `Identity` | The **original message recipient** (who sends this ACK). | Routing |
 | **3** | `message_id` | `string` | The **ID of the specific `Message`** being acknowledged. | Reference |
-| **4** | `method` | `int32` | The method or action related to the ACK (e.g., delivered, read, requested). | Status |
+| **4** | `method` | `int32` | The method or action related to the Request Type (1 = REQUEST, 2 = RESPONSE| Status |
 | **5** | `timestamp` | `int64` | Time the acknowledgment was generated (Server time recommended). | Status |
 | **6** | `status_code` | `int32` | **Status code** indicating success or failure of delivery/processing. | Status |
 | **7** | `peer` | `Peer` | **Synchronization Data**. Contains the crucial **server-generated stream offsets** that the sender needs to update its local message state. | Critical Stream Sync |
