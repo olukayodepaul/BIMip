@@ -1,5 +1,3 @@
-
-
 ## 📩 Message
 
 The `Message` is the core Data Transfer Object (DTO) for all conversational and control events. It encapsulates the content, security metadata (encryption and signature), and routing information.
@@ -37,5 +35,3 @@ message Message {
 | **9** | `type` | `int32` | **Origin/Target Classification**: `1=SENDER` (chat), `2=DEVICE` (control), `3=RECEIVER` (notification). | Client |
 | **10** | `transmission_mode` | `int32` | **Server Delivery Method**: `1=pull`, `2=push`. | Client |
 | **11** | `peer` | `optional Peer` | **Server-assigned stream metadata** containing stream offsets for reliability. | Server |
-
-\
