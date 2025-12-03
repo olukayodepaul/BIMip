@@ -1,7 +1,3 @@
-Got it! Here’s the **updated full Message documentation**, integrating your complete **Field Reference table** and removing the Message Flow Diagram section.
-
----
-
 # 📩 **Message**
 
 The `Message` is the core **Data Transfer Object (DTO)** in the system. It secures, transports, and routes all communication. Messages may include **end-to-end encryption (E2E)** or **transport encryption only**.
