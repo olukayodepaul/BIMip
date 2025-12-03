@@ -34,4 +34,4 @@ message Message {
 | **8** | `signature` | `string` | **Base64 digital signature** for **integrity and authentication**. | Client |
 | **9** | `type` | `int32` | **Origin/Target Classification**: `1=SENDER`, `2=DEVICE`, `3=RECEIVER` . | Client |
 | **10** | `transmission_mode` | `int32` | **Server Delivery Method**: `1=pull`, `2=push`. | Client |
-| **11** | `peer` | `optional Peer` | **Server-assigned stream metadata** containing stream offsets for reliability. | Server |
+| **11** | `peer` | `optional Peer` | **Server-assigned stream metadata** The Peer message contains server-assigned stream synchronization metadata critical for reliability. It includes the base IDs of both the sender (from) and the recipient (to), along with the server's global stream offset (offset) for the current message and the recipient's stream offset (peer\_offset) as known by the server, which are continuously exchanged to maintain reliable two-way communication.. | Server |
