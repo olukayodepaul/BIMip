@@ -4,88 +4,124 @@
 
 [![Build Status](https://github.com/phoenixframework/phoenix/workflows/CI/badge.svg)](https://github.com/phoenixframework/phoenix/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/phoenix.svg)](https://hex.pm/packages/phoenix) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/phoenix)
 
-## Getting started
 
-See the official site at <https://www.phoenixframework.org/>.
+# 📚 Core Messaging Protocol Documentation
 
-Install the latest version of Phoenix by following the instructions at <https://hexdocs.pm/phoenix/installation.html#phoenix>.
+This section details the Protocol Buffer definitions for the primary communication and synchronization structures.
 
-## Documentation
+## 🔑 1. Identity
 
-API documentation is available at <https://hexdocs.pm/phoenix>.
+The `Identity` message defines a fully addressable entity within the system, allowing for targeted routing to a user's account, specific device, or hosting server node.
 
-Phoenix.js documentation is available at <https://hexdocs.pm/phoenix/js>.
-
-## Contributing
-
-We appreciate any contribution to Phoenix. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker][4].
-
-### Generating a Phoenix project from unreleased versions
-
-You can create a new project using the latest Phoenix source installer (the `phx.new` Mix task) with the following steps:
-
-1. Remove any previously installed `phx_new` archives so that Mix will pick up the local source code. This can be done with `mix archive.uninstall phx_new` or by simply deleting the file, which is usually in `~/.mix/archives/`.
-2. Copy this repo via `git clone https://github.com/phoenixframework/phoenix` or by downloading it
-3. Run the `phx.new` Mix task from within the `installer` directory, for example:
-
-```bash
-cd phoenix/installer
-mix phx.new dev_app --dev
+```protobuf
+message Identity {
+  string eid = 1;                              // User’s global identifier (e.g., account ID or JID)
+  optional string connection_resource_id = 2;  // Identifier for a specific device or session instance
+  optional string node = 3;                    // System node handling this entity (cluster context)
+}
 ```
 
-The `--dev` flag will configure your new project's `:phoenix` dep as a relative path dependency, pointing to your local Phoenix checkout:
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| **`eid`** | `string` | **Entity Identifier**. The mandatory, global ID for the user or entity (e.g., account name). |
+| **`connection_resource_id`** | `optional string` | **Device/Session ID**. Used to target a specific connected device or session instance belonging to the `eid`. |
+| **`node`** | `optional string` | **Server Node ID**. Used for internal server routing to locate the specific cluster node managing the connection. |
 
-```elixir
-defp deps do
-  [{:phoenix, path: "../..", override: true},
+-----
+
+-----
+
+## 📩 2. Message
+
+The `Message` is the core data transfer object, encapsulating content, security, and routing metadata.
+
+```protobuf
+message Message {
+   string message_id = 1;
+   Identity from = 2;
+   Identity to = 3;
+   int64 timestamp = 4;
+   bytes payload = 5;
+   string encryption_type = 6;
+   string encrypted = 7;
+   string signature = 8;
+   int32 type = 9;                // 1=SENDER  2=DEVICE  3=RECEIVER
+   int32 transmission_mode = 10;  // push(2)  or pull(1)
+   optional Peer peer = 11;
+}
 ```
 
-To create projects outside of the `installer/` directory, add the latest archive to your machine by following the instructions in [installer/README.md](https://github.com/phoenixframework/phoenix/blob/main/installer/README.md)
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| **`message_id`** | `string` | Client-generated ID for tracking. |
+| **`from`** | `Identity` | The **sender's** identity. |
+| **`to`** | `Identity` | The **recipient's** identity. |
+| **`timestamp`** | `int64` | Message creation time in epoch milliseconds. |
+| **`payload`** | `bytes` | Raw message content (e.g., JSON), typically used if not E2E encrypted. |
+| **`encryption_type`** | `string` | Security scheme: `"none"`, `"AES256"`, **`"E2E"`**. |
+| **`encrypted`** | `string` | **Base64 ciphertext** of the content, if encrypted. |
+| **`signature`** | `string` | **Base64 digital signature** for integrity and sender authentication. |
+| **`type`** | `int32` | **Origin/Target Classification**: `1=SENDER` (chat), `2=DEVICE` (control), `3=RECEIVER` (notification). |
+| **`transmission_mode`** | `int32` | **Server Delivery Method**: `1=pull`, `2=push`. |
+| **`peer`** | `optional Peer` | **Server-assigned stream metadata** (offsets) for reliability. |
 
-### Building from source
+-----
 
-To build the documentation:
+-----
 
-```bash
-npm install
-MIX_ENV=docs mix docs
+## 🤝 3. Peer
+
+The `Peer` message carries synchronization information vital for stream management and reliability, typically populated by the server.
+
+```protobuf
+message Peer {
+  string from = 1;
+  string to = 2;
+  int64 offset = 3;
+  int64 peer_offset = 4;
+}
 ```
 
-To build Phoenix:
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| **`from`** | `string` | The **base ID** (`eid`) of the message sender in the context of the stream. |
+| **`to`** | `string` | The **base ID** (`eid`) of the message recipient in the context of the stream. |
+| **`offset`** | `int64` | The **server-assigned global stream ID** of the current message or synchronization point. |
+| **`peer_offset`** | `int64` | The **last acknowledged offset** of the opposing peer's stream, crucial for flow control and reliability. |
 
-```bash
-mix deps.get
-mix compile
+-----
+
+-----
+
+## ✅ 4. MessagePeerAckSignal
+
+The `MessagePeerAckSignal` is the acknowledgment mechanism used by the system. It is sent back to the original message sender to confirm delivery, update status, and convey critical, server-generated stream synchronization data.
+
+```protobuf
+message MessagePeerAckSignal {
+  Identity to = 1;
+  Identity from = 2;
+  string message_id = 3;
+  int32 method = 4;
+  int64 timestamp = 5;
+  int32 status_code = 6;
+  Peer peer = 7;
+}
 ```
 
-To build the Phoenix installer:
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| **`to`** | `Identity` | The **original message sender** (recipient of the ACK). |
+| **`from`** | `Identity` | The **original message recipient** (sender of the ACK). |
+| **`message_id`** | `string` | The **ID of the message** being acknowledged. |
+| **`method`** | `int32` | The method or action related to the ACK (e.g., delivered, read, requested offset). |
+| **`timestamp`** | `int64` | Time the acknowledgment was generated (server time recommended). |
+| **`status_code`** | `int32` | **HTTP-like status code** (e.g., 200 for OK, 400 for Failure). |
+| **`peer`** | `Peer` | **CRITICAL:** Contains the server-generated stream offsets (`offset` and `peer_offset`) required for the sender to synchronize its local stream state. |
 
-```bash
-mix deps.get
-mix compile
-mix archive.build
-```
+-----
 
-To build Phoenix.js:
-
-```bash
-cd assets
-npm install
-```
-
-## Important links
-
-* [#elixir][1] on [Libera][2] IRC
-* [elixir-lang Slack channel][3]
-* [Issues tracker][4]
-* [Phoenix Forum (questions and proposals)][5]
-* Visit Phoenix's sponsor, DockYard, for expert [Phoenix Consulting](https://dockyard.com/phoenix-consulting)
-
-  [1]: https://web.libera.chat/?channels=#elixir
-  [2]: https://libera.chat/
-  [3]: https://elixir-lang.slack.com/
-  [4]: https://github.com/phoenixframework/phoenix/issues
-  [5]: https://elixirforum.com/c/phoenix-forum
+Would you like to review this documentation or perhaps define the status codes you plan to use for the `MessagePeerAckSignal`?
 
 ## Copyright and License
 
