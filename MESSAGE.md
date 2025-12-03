@@ -117,55 +117,35 @@ hex    = Base.encode16(binary, case: :upper)
 ### JavaScript / Node.js
 
 ```javascript
-const protobuf = require("protobufjs");
-
-protobuf.load("dartmessage.proto")
-  .then(root => {
-    const Identity = root.lookupType("bimip.Identity");
-    const Message = root.lookupType("bimip.Message");
-    const MessageScheme = root.lookupType("bimip.MessageScheme");
-
-    const payloadJson = {
-      data: "This is the test message",
-      emoji: "👋",
-      cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
-    };
-
-    const fromIdentity = Identity.create({
-      eid: "a@domain.com",
-      connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK" // match Elixir
-    });
-
-    const toIdentity = Identity.create({ eid: "b@domain.com" });
-
-    const request = Message.create({
-      message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI", // match Elixir
-      from: fromIdentity,
-      to: toIdentity,
-      timestamp: Date.now(),
-      payload: Buffer.from(JSON.stringify(payloadJson)),
-      encryption_type: "E2E",       // match Elixir
-      encrypted: "MIIB8AYJKoZIhvcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIBADAfMA4GCSqGSIb3DQEBCwUwggExBgsqhkiG9w0BCwEw",
-      signature: "SHA256-R4f0S4E3V7gH6tK2mP9Yc0B1dZ2eG3h4iJ5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jKmNlOpZqRsT",
-      type: null,                   // match Elixir nil
-      transmission_mode: null,      // match Elixir nil
-      peer: null
-    });
-
-    // oneof assignment
-    const messageScheme = MessageScheme.create({
-      route: 6,
-      message: request
-    });
-
-    const binary = MessageScheme.encode(messageScheme).finish();
-    const hex = Buffer.from(binary).toString("hex").toUpperCase();
-
-    console.log("Binary:", binary);
-    console.log("Hex:", hex);
-  })
-  .catch(err => console.error(err));
-
+%Bimip.MessageScheme{
+  route: 6,
+  payload: {:message,
+   %Bimip.Message{
+     message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
+     from: %Bimip.Identity{
+       eid: "a@domain.com",
+       connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK",
+       node: nil,
+       __unknown_fields__: []
+     },
+     to: %Bimip.Identity{
+       eid: "b@domain.com",
+       connection_resource_id: nil,
+       node: nil,
+       __unknown_fields__: []
+     },
+     timestamp: 1764788238799,
+     payload: "{\"data\":\"This is the test message\",\"emoji\":\"👋\",\"cdn_url\":\"www.dcn_dart/jbdchdbachbajds/image.png\"}",
+     encryption_type: "E2E",
+     encrypted: "MIIB8AYJKoZIhvcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIBADAfMA4GCSqGSIb3DQEBCwUwggExBgsqhkiG9w0BCwEw",
+     signature: "SHA256-R4f0S4E3V7gH6tK2mP9Yc0B1dZ2eG3h4iJ5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jKmNlOpZqRsT",
+     type: 1,
+     transmission_mode: 2,
+     peer: nil,
+     __unknown_fields__: []
+   }},
+  __unknown_fields__: []
+}
 
 ```
 
