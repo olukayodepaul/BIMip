@@ -118,38 +118,54 @@ hex    = Base.encode16(binary, case: :upper)
 
 ```javascript
 const protobuf = require("protobufjs");
-const { MessageScheme, Message, Identity } = require("./compiled_protos"); // generated JS protobuf
 
-const payloadJson = {
-  data: "This is the test message",
-  emoji: "👋",
-  cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
-};
+protobuf.load("dartmessage.proto")
+  .then(root => {
+    const Identity = root.lookupType("bimip.Identity");
+    const Message = root.lookupType("bimip.Message");
+    const MessageScheme = root.lookupType("bimip.MessageScheme");
 
-const encryptedPayload = encryptForRecipient(JSON.stringify(payloadJson), recipientKey);
-const signature = sign(encryptedPayload, senderPrivateKey);
+    const payloadJson = {
+      data: "This is the test message",
+      emoji: "👋",
+      cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
+    };
 
-const request = Message.create({
-  messageId: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
-  from: { eid: "a@domain.com", connectionResourceId: "device-abc123" },
-  to: { eid: "b@domain.com" },
-  timestamp: Date.now(),
-  payload: Buffer.from([]), // empty because encrypted is used
-  encryptionType: "E2E",
-  encrypted: encryptedPayload,
-  signature: signature,
-});
+    const fromIdentity = Identity.create({
+      eid: "a@domain.com",
+      connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK" // match Elixir
+    });
 
-const message = MessageScheme.create({
-  route: 6,
-  payload: { message: request }
-});
+    const toIdentity = Identity.create({ eid: "b@domain.com" });
 
-const binary = MessageScheme.encode(message).finish();
-const hex = Buffer.from(binary).toString("hex").toUpperCase();
+    const request = Message.create({
+      message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI", // match Elixir
+      from: fromIdentity,
+      to: toIdentity,
+      timestamp: Date.now(),
+      payload: Buffer.from(JSON.stringify(payloadJson)),
+      encryption_type: "E2E",       // match Elixir
+      encrypted: "MIIB8AYJKoZIhvcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIBADAfMA4GCSqGSIb3DQEBCwUwggExBgsqhkiG9w0BCwEw",
+      signature: "SHA256-R4f0S4E3V7gH6tK2mP9Yc0B1dZ2eG3h4iJ5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jKmNlOpZqRsT",
+      type: null,                   // match Elixir nil
+      transmission_mode: null,      // match Elixir nil
+      peer: null
+    });
 
-console.log("Binary:", binary);
-console.log("Hex:", hex);
+    // oneof assignment
+    const messageScheme = MessageScheme.create({
+      route: 6,
+      message: request
+    });
+
+    const binary = MessageScheme.encode(messageScheme).finish();
+    const hex = Buffer.from(binary).toString("hex").toUpperCase();
+
+    console.log("Binary:", binary);
+    console.log("Hex:", hex);
+  })
+  .catch(err => console.error(err));
+
 
 ```
 
