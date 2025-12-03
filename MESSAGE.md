@@ -81,39 +81,48 @@ message Message {
 ## 📝 Example: E2E Encrypted Message (Elixir)
 
 ```elixir
-payload_json = %{
-  "data" => "Secret chat message",
-  "emogi" => "🔒",
-  "cdn_url" => "www.dcn_dart/encrypted/image.png"
-} |> Jason.encode!()
-
-encrypted_payload = MyCrypto.encrypt_for_recipient(payload_json, recipient_public_key)
-
 request = %Bimip.Message{
-  message_id: "e2e123456",
+  message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
   from: %Bimip.Identity{
     eid: "a@domain.com",
-    connection_resource_id: "device-abc123"
+    connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK"
   },
-  to: %Bimip.Identity{ eid: "b@domain.com" },
+  to: %Bimip.Identity{
+    eid: "b@domain.com"
+  },
   timestamp: System.system_time(:millisecond),
-  payload: <<>>, # empty for E2E
+  payload: Jason.encode!(%{
+    data: "This is the test message",
+    emoji: "👋",
+    cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
+  }),
   encryption_type: "E2E",
-  encrypted: encrypted_payload,
-  signature: MyCrypto.sign(encrypted_payload, sender_private_key),
-  type: 1,
-  transmission_mode: 2
+  encrypted: "MIIB8AYJKoZIhvcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIBADAfMA4GCSqGSIb3DQEBCwUwggExBgsqhkiG9w0BCwEw",
+  signature: "SHA256-R4f0S4E3V7gH6tK2mP9Yc0B1dZ2eG3h4iJ5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jKmNlOpZqRsT"
 }
+
+message = %Bimip.MessageScheme{
+  route: 6,
+  payload: {:message, request}
+}
+
+binary = Bimip.MessageScheme.encode(message)
+hex    = Base.encode16(binary, case: :upper)
 ```
 
 ---
 
-
 ## 🌐 Multi-language Examples
 
-**JavaScript / Node.js**
+### JavaScript / Node.js
 
 ```javascript
+const payloadJson = {
+  data: "This is the test message",
+  emoji: "👋",
+  cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
+};
+
 const encryptedPayload = encryptForRecipient(JSON.stringify(payloadJson), recipientKey);
 
 const message = new Message({
@@ -130,13 +139,18 @@ const message = new Message({
 });
 ```
 
-**Java**
+### Java
 
 ```java
 Message message = Message.newBuilder()
     .setMessageId("e2e123456")
-    .setFrom(Identity.newBuilder().setEid("a@domain.com").setConnectionResourceId("device-abc123").build())
-    .setTo(Identity.newBuilder().setEid("b@domain.com").build())
+    .setFrom(Identity.newBuilder()
+        .setEid("a@domain.com")
+        .setConnectionResourceId("device-abc123")
+        .build())
+    .setTo(Identity.newBuilder()
+        .setEid("b@domain.com")
+        .build())
     .setTimestamp(System.currentTimeMillis())
     .setPayload(ByteString.EMPTY)
     .setEncryptionType("E2E")
@@ -147,13 +161,18 @@ Message message = Message.newBuilder()
     .build();
 ```
 
-**Kotlin**
+### Kotlin
 
 ```kotlin
 val message = Message.newBuilder()
     .setMessageId("e2e123456")
-    .setFrom(Identity.newBuilder().setEid("a@domain.com").setConnectionResourceId("device-abc123").build())
-    .setTo(Identity.newBuilder().setEid("b@domain.com").build())
+    .setFrom(Identity.newBuilder()
+        .setEid("a@domain.com")
+        .setConnectionResourceId("device-abc123")
+        .build())
+    .setTo(Identity.newBuilder()
+        .setEid("b@domain.com")
+        .build())
     .setTimestamp(System.currentTimeMillis())
     .setPayload(ByteString.EMPTY)
     .setEncryptionType("E2E")
@@ -164,9 +183,17 @@ val message = Message.newBuilder()
     .build()
 ```
 
-**Dart**
+### Dart
 
 ```dart
+final payloadJson = {
+  "data": "This is the test message",
+  "emoji": "👋",
+  "cdn_url": "www.dcn_dart/jbdchdbachbajds/image.png"
+};
+
+final encryptedPayload = encryptForRecipient(jsonEncode(payloadJson), recipientKey);
+
 final message = Message(
   messageId: "e2e123456",
   from: Identity(eid: "a@domain.com", connectionResourceId: "device-abc123"),
@@ -181,9 +208,17 @@ final message = Message(
 );
 ```
 
-**Swift**
+### Swift
 
 ```swift
+let payloadJson: [String: Any] = [
+    "data": "This is the test message",
+    "emoji": "👋",
+    "cdn_url": "www.dcn_dart/jbdchdbachbajds/image.png"
+]
+
+let encryptedPayload = encryptForRecipient(payloadJson, recipientKey)
+
 let message = Message.with {
     $0.messageId = "e2e123456"
     $0.from = Identity.with { $0.eid = "a@domain.com"; $0.connectionResourceId = "device-abc123" }
@@ -197,4 +232,3 @@ let message = Message.with {
     $0.transmissionMode = 2
 }
 ```
-
