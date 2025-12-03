@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./priv/static/phoenix-orange.png" />
   <source media="(prefers-color-scheme: light)" srcset="./priv/static/phoenix.png" />
-  <img src="phoenix.png" alt="Phoenix logo" />
+  <img src="../phoenix.png" alt="Phoenix logo" />
 </picture>
 
 > Peace of mind from prototype to production.
