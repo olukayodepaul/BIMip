@@ -32,6 +32,6 @@ message Message {
 | **6** | `encryption_type` | `string` | Security scheme: `"none"`, `"AES256"`, **`"E2E"`**. | Client |
 | **7** | `encrypted` | `string` | **Base64 ciphertext** of the content, if encrypted. | Client |
 | **8** | `signature` | `string` | **Base64 digital signature** for **integrity and authentication**. | Client |
-| **9** | `type` | `int32` | **Origin/Target Classification**: `1=SENDER` (chat), `2=DEVICE` (control), `3=RECEIVER` (notification). | Client |
+| **9** | `type` | `int32` | **Origin/Target Classification**: `1=SENDER`, `2=DEVICE`, `3=RECEIVER` . | Client |
 | **10** | `transmission_mode` | `int32` | **Server Delivery Method**: `1=pull`, `2=push`. | Client |
 | **11** | `peer` | `optional Peer` | **Server-assigned stream metadata** containing stream offsets for reliability. | Server |
