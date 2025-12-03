@@ -138,8 +138,6 @@ const request = Message.create({
   encryptionType: "E2E",
   encrypted: encryptedPayload,
   signature: signature,
-  type: 1,
-  transmissionMode: 2
 });
 
 const message = MessageScheme.create({
@@ -169,8 +167,6 @@ Message request = Message.newBuilder()
     .setEncryptionType("E2E")
     .setEncrypted(encryptedPayload)
     .setSignature(signature)
-    .setType(1)
-    .setTransmissionMode(2)
     .build();
 
 MessageScheme message = MessageScheme.newBuilder()
@@ -200,8 +196,6 @@ val request = Message.newBuilder()
     .setEncryptionType("E2E")
     .setEncrypted(encryptedPayload)
     .setSignature(signature)
-    .setType(1)
-    .setTransmissionMode(2)
     .build()
 
 val message = MessageScheme.newBuilder()
@@ -241,8 +235,6 @@ final request = Message(
   encryptionType: "E2E",
   encrypted: encryptedPayload,
   signature: signature,
-  type: 1,
-  transmissionMode: 2,
 );
 
 final message = MessageScheme(
@@ -272,8 +264,6 @@ final message = Message(
   encryptionType: "E2E",
   encrypted: encryptedPayload,
   signature: signature,
-  type: 1,
-  transmissionMode: 2,
 );
 ```
 
@@ -291,8 +281,6 @@ let request = Message.with {
     $0.encryptionType = "E2E"
     $0.encrypted = encryptedPayload
     $0.signature = signature
-    $0.type = 1
-    $0.transmissionMode = 2
 }
 
 let message = MessageScheme.with {
