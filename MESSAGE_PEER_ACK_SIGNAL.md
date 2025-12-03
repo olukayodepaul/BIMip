@@ -27,3 +27,7 @@ message MessagePeerAckSignal {
 | **5** | `timestamp` | `int64` | Time the acknowledgment was generated (Server time recommended). | Status |
 | **6** | `status_code` | `int32` | **Status code** indicating success or failure of delivery/processing. | Status |
 | **7** | `peer` | `Peer` | **Synchronization Data**. Contains the crucial **server-generated stream offsets** that the sender needs to update its local message state. | Critical Stream Sync |
+
+
+
+
