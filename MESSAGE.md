@@ -1,6 +1,6 @@
 ## 📩 Message
 
-The `Message` is the core Data Transfer Object (DTO) for all conversational and control events. It encapsulates the content, security metadata (encryption and signature), and routing information.
+`Message` as the core Data Transfer Object (DTO), the Message secures and routes all communication. It encapsulates the content, necessary security metadata (encryption and signature), and address information such as the sender (from) and recipient (to).
 
 ### Protobuf Definition
 
