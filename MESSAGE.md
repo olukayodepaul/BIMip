@@ -14,7 +14,7 @@ message Message {
    string encryption_type = 6;
    string encrypted = 7;
    string signature = 8;
-   int32 type = 9;         
+   optional int32 type = 9;         
    int32 transmission_mode = 10; 
    optional Peer peer = 11;
 }
