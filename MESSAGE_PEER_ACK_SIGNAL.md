@@ -49,7 +49,6 @@ If **User A** sends a message that the server assigns to User A's **Offset 5**:
 | **Sender (A)** | **5** | EID of B | **5** |
 | **Receiver (B)** | **102** | EID of A | **5** |
 
-> **Architecture Note:** While the Receiver has their own local `offset` (102), it is used only for physical file seeking. For all **logical conversation tracking**, the `peer_offset` (5) is the only ID used by both parties.
 
 ---
 
