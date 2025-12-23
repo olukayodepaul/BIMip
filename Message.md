@@ -31,17 +31,13 @@ It encapsulates:
     optional Peer peer = 11;
     optional int64 offset = 12;
   }
-```
 
----
-
-## 📘 Peer
-```
- message Peer {
+message Peer {
     string to = 1;
     int64 peer_offset = 2;
   }
 ```
+
 ---
 
 ## 📝 Field Reference
