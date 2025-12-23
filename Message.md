@@ -34,6 +34,17 @@ message Message {
 
 ---
 
+## 📘 Peer
+```
+ message Peer {
+    string from = 1;
+    string to = 2;
+    int64 offset = 4;
+  }
+
+```
+---
+
 ## 📝 Field Reference
 
 |   Tag  | Field Name          | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                           | Source |
