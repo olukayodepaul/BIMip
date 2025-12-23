@@ -55,17 +55,6 @@ If **User A** sends a message that the server assigns to User A's **Offset 5**:
 
 ### 📘 Field Reference
 
-| Tag | Field Name | Type | Description |
-| --- | --- | --- | --- |
-| **1** | `to` | `Identity` | The **original message sender** receiving the ACK. |
-| **3** | `message_id` | `string` | Client-generated UUID for the specific message. |
-| **6** | `status_code` | `int32` | Processing status (200 = OK, 409 = Conflict). |
-| **7** | `peer` | `Peer` | **The Shared Anchor**. Contains the `peer_offset` which is **always the Sender's original offset**. This is the unique key used by both users. |
-| **8** | `offset` | `int64` | The **Sender's Local Sequence ID**. In the ACK, this matches the Anchor. |
-
-
-### Field Reference
-
 | Tag | Field Name | Type | Description | Role |
 | --- | --- | --- | --- | --- |
 | **1** | `to` | `Identity` | The **original message sender** (who receives this ACK). | Routing |
