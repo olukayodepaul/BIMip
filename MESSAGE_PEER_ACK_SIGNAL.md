@@ -28,36 +28,63 @@ message MessagePeerAckSignal {
 | **4** | `method` | `int32` | Operation code (1 = REQUEST, 2 = RESPONSE). | Status |
 | **5** | `timestamp` | `int64` | Time the acknowledgment was generated (Epoch milliseconds). | Status |
 | **6** | `status_code` | `int32` | **Status code** (e.g., 200 = Success, 409 = Duplicate). | Status |
-| **7** | `peer` | `Peer` | **Synchronization Data**. Contains the recipient's assigned `peer_offset`. | Sync |
+| **7** | `peer` | `Peer` | **Synchronization Data**. Contains the `peer_offset` and the cross-referenced `to` identity. | Sync |
 | **8** | `offset` | `int64` | **Sender Offset**. The message's unique index in the sender's own history. | Sync |
 
 ---
 
-### 🔄 Dual-Offset Synchronization Logic
+### 🔄 Mirror Synchronization (Cross-EID Logic)
 
-The `MessagePeerAckSignal` provides the client with two distinct points of truth. This allows the sender to know exactly where the message sits in both their own history and the recipient's history.
+The system uses a **Symmetrical Mirror** approach. This ensures that both User A and User B can track the exact same message using their respective perspectives:
 
-* **`offset` (Field 8):** This is the incremented counter for the **Sender**. When the sender receives this, they update their local database to mark the message as "Persisted" at this specific index.
-* **`peer.peer_offset` (Inside Field 7):** This is the incremented counter for the **Recipient**. The sender stores this to track exactly where this message landed in the other person's inbox, ensuring zero-gap synchronization.
+#### 1. The Sender's Perspective (User A)
+
+* **Log Entry:** Saved in User A's partition.
+* **`offset`:** User A's local sequence number (e.g., `15`).
+* **`peer.to`:** Points to **User B**.
+* **`peer.peer_offset`:** User B's sequence number (e.g., `82`).
+* **Result:** User A knows: *"This is my 15th message, and it is User B's 82nd message."*
+
+#### 2. The Receiver's Perspective (User B)
+
+* **Log Entry:** Saved in User B's partition.
+* **`offset`:** User B's local sequence number (e.g., `82`).
+* **`peer.to`:** Points to **User A**.
+* **`peer.peer_offset`:** User A's sequence number (e.g., `15`).
+* **Result:** User B knows: *"This is my 82nd message, and it came from User A's 15th slot."*
 
 ---
 
-### 📝 Example Usage (Elixir)
+### 📝 Logic Visualization
+
+| Entity | `offset` | `peer.to` | `peer.peer_offset` |
+| --- | --- | --- | --- |
+| **Sender (A)** | `15` | `EID of B` | `82` |
+| **Receiver (B)** | `82` | `EID of A` | `15` |
+
+This "Cross-EID" structure allows the client applications to perform **instant gap detection**. If User B sees a message with `peer.peer_offset: 17` but their last message from User A was `peer.peer_offset: 15`, they know immediately that they missed message `16` from User A and can request a re-sync.
+
+---
+
+### 📝 Example Usage (Elixir Implementation)
 
 ```elixir
-# Building the ACK response after a successful Mnesia/File write
-ack_signal = %Bimip.MessagePeerAckSignal{
-  to: sender_identity,
-  from: server_identity,
-  message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIddd",
+# When User A sends to User B:
+ack_for_a = %Bimip.MessagePeerAckSignal{
+  to: identity_a,
+  message_id: mid,
   status_code: 200,
-  offset: 15,          # User A's offset
+  offset: 15,          # A's Offset
   peer: %Bimip.Peer{
-    to: "b@domain.com",
-    peer_offset: 82    # User B's offset
-  },
-  timestamp: System.system_time(:millisecond)
+    to: "b@domain.com",# Link to B
+    peer_offset: 82    # B's Offset
+  }
+}
+
+# The message stored in B's queue would effectively mirror this:
+message_in_b_queue = %{
+  offset: 82,
+  peer: %{to: "a@domain.com", peer_offset: 15}
 }
 
 ```
-
