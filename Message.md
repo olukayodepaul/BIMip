@@ -37,8 +37,7 @@ message Message {
 ## 📘 Peer
 ```
  message Peer {
-    string from = 1;
-    string to = 2;
+    string to = 1;
     int64 offset = 4;
   }
 
