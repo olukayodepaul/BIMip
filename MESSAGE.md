@@ -1,3 +1,6 @@
+
+<img src="./message.png" alt="Phoenix logo" />
+
 # 📩 **Message**
 
 The `Message` is the core **Data Transfer Object (DTO)** in the system. It secures, transports, and routes all communication. Messages may include **end-to-end encryption (E2E)** or **transport encryption only**.
