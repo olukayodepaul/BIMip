@@ -36,6 +36,17 @@ message Peer {
     string to = 1;
     int64 peer_offset = 2;
   }
+
+ message MessagePeerAckSignal {
+    Identity to = 1;
+    Identity from = 2;
+    string message_id = 3;
+    int32 method = 4;
+    int64 timestamp = 5;  
+    int32 status_code = 6; 
+    Peer peer = 7;
+    int64 offset = 8;
+  }
 ```
 
 ---
