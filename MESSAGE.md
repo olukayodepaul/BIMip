@@ -1,5 +1,5 @@
 
-<img src="./message.png" alt="Phoenix logo" />
+<img src="./message.png" alt="Phoenix logo" width="400" />
 
 # 📩 **Message**
 
