@@ -64,4 +64,17 @@ If **User A** sends a message that the server assigns to User A's **Offset 5**:
 | **8** | `offset` | `int64` | The **Sender's Local Sequence ID**. In the ACK, this matches the Anchor. |
 
 
+### Field Reference
 
+| Tag | Field Name | Type | Description | Role |
+| --- | --- | --- | --- | --- |
+| **1** | `to` | `Identity` | The **original message sender** (who receives this ACK). | Routing |
+| **2** | `from` | `Identity` | The **server or recipient** identity issuing the acknowledgment. | Routing |
+| **3** | `message_id` | `string` | The **ID of the specific `Message**` being acknowledged. | Reference |
+| **4** | `method` | `int32` | Operation code (1 = REQUEST, 2 = RESPONSE). | Status |
+| **5** | `timestamp` | `int64` | Time the acknowledgment was generated (Epoch milliseconds). | Status |
+| **6** | `status_code` | `int32` | **Status code** (e.g., 200 = Success, 409 = Duplicate). | Status |
+| **7** | `peer` | `Peer` | **Synchronization Data**. Contains the `peer_offset` and the cross-referenced `to` identity. | Sync |
+| **8** | `offset` | `int64` | **Sender Offset**. The message's unique index in the sender's own history. | Sync |
+
+---
