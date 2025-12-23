@@ -38,7 +38,7 @@ message Message {
 ```
  message Peer {
     string to = 1;
-    int64 offset = 4;
+    int64 offset = 2;
   }
 
 ```
