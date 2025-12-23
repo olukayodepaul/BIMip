@@ -17,19 +17,20 @@ It encapsulates:
 ## 📘 Protobuf Definition
 
 ```protobuf
-message Message {
-   string message_id = 1;
-   Identity from = 2;
-   Identity to = 3;
-   int64 timestamp = 4;
-   bytes payload = 5;
-   string encryption_type = 6;
-   string encrypted = 7;
-   string signature = 8;
-   optional int32 type = 9;         
-   optional int32 transmission_mode = 10; 
-   optional Peer peer = 11;
-}
+  message Message {
+    string message_id = 1;
+    Identity from = 2;
+    Identity to = 3;
+    int64 timestamp = 4;
+    bytes payload = 5;
+    string encryption_type = 6;
+    string encrypted = 7;
+    string signature = 8;
+    optional int32 type = 9;         
+    optional int32 transmission_mode = 10; 
+    optional Peer peer = 11;
+    optional int64 offset = 12;
+  }
 ```
 
 ---
@@ -38,9 +39,8 @@ message Message {
 ```
  message Peer {
     string to = 1;
-    int64 offset = 2;
+    int64 peer_offset = 2;
   }
-
 ```
 ---
 
