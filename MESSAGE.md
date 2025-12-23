@@ -1,4 +1,4 @@
-# 📩 **Message**
+## 📩 **Message**
 
 <img src="./message.png" alt="Phoenix logo" width="700" />
 
