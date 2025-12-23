@@ -1,4 +1,7 @@
-# 📩 **Message**
+## 📩 **Message**
+
+<img src="./message.png" alt="Phoenix logo" width="700" />
+
 
 The `Message` is the core **Data Transfer Object (DTO)** in the system. It secures, transports, and routes all communication. Messages may include **end-to-end encryption (E2E)** or **transport encryption only**.
 
@@ -27,19 +30,6 @@ message Message {
    optional int32 transmission_mode = 10; 
    optional Peer peer = 11;
 }
-```
-
----
-
-## Peer Message
-
-```
-message Peer {
-    string from = 1;
-    string to = 2;
-    int64 offset = 4;
-  }
-  
 ```
 
 ---
