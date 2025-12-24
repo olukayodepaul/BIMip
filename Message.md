@@ -18,7 +18,7 @@ It encapsulates:
 
 ```protobuf
   message Message {
-    string message_id = 1;
+    string peer_uid = 1;
     Identity from = 2;
     Identity to = 3;
     int64 timestamp = 4;
@@ -28,7 +28,7 @@ It encapsulates:
     string signature = 8;
     optional int32 type = 9;         
     optional int32 transmission_mode = 10; 
-    optional Peer peer = 11;
+    optional string peer_eid = 11;
     optional int64 offset = 12;
   }
 
@@ -55,7 +55,7 @@ message Peer {
 
 |   Tag  | Field Name          | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                           | Source |
 | :----: | :------------------ | :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
-|  **1** | `peer_message_uid`        | `string`        | **Client-generated ID** for message tracking and acknowledgment.                                                                                                                                                                                                                                                                                                                                                                                      | Client |
+|  **1** | `peer_uid`        | `string`        | **Client-generated ID** for message tracking and acknowledgment.                                                                                                                                                                                                                                                                                                                                                                                      | Client |
 |  **2** | `from`              | `Identity`      | The **sender's** identity.                                                                                                                                                                                                                                                                                                                                                                                                                            | Client |
 |  **3** | `to`                | `Identity`      | The **recipient's** identity.                                                                                                                                                                                                                                                                                                                                                                                                                         | Client |
 |  **4** | `timestamp`         | `int64`         | Message creation time in **epoch milliseconds**.                                                                                                                                                                                                                                                                                                                                                                                                      | Client |
