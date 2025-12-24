@@ -102,7 +102,7 @@ message Peer {
 
 ```elixir
 request = %Bimip.Message{
-  message_id: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
+  peer_uid: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
   from: %Bimip.Identity{
     eid: "a@domain.com",
     connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK"
