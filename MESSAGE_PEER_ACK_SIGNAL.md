@@ -35,11 +35,11 @@ When transmitted over the wire, this signal is wrapped in a `MessageScheme` with
 message MessagePeerAckSignal {
   Identity to = 1;
   Identity from = 2;
-  string message_id = 3;
+  string peer_uid = 3;
   int32 method = 4;
   int64 timestamp = 5;
   int32 status_code = 6;
-  Peer peer = 7;
+  string peer_eid = 7;
   int64 offset = 8;  // Local physical offset for the Sender
 }
 
