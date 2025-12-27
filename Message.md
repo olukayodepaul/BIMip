@@ -111,11 +111,8 @@ request = %Bimip.Message{
     eid: "b@domain.com"
   },
   timestamp: System.system_time(:millisecond),
-  payload: Jason.encode!(%{
-    data: "This is the test message",
-    emoji: "👋",
-    cdn_url: "www.dcn_dart/jbdchdbachbajds/image.png"
-  }),
+  payload: Jason.encode!("This is the test message 👋"),
+  payload_context: 1,
   encryption_type: "E2E",
   encrypted: "MIIB8AYJKoZIhvcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgIBADAfMA4GCSqGSIb3DQEBCwUwggExBgsqhkiG9w0BCwEw",
   signature: "SHA256-R4f0S4E3V7gH6tK2mP9Yc0B1dZ2eG3h4iJ5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jKmNlOpZqRsT"
