@@ -28,7 +28,7 @@ It encapsulates:
     string signature = 8;
     optional int32 type = 9;         
     optional int32 transmission_mode = 10; 
-    optional string peer_eid = 11;
+    optional string reply_to = 11;
     optional int64 offset = 12;
   }
 
@@ -37,14 +37,14 @@ message Peer {
     int64 peer_offset = 2;
   }
 
- message MessagePeerAckSignal {
+ message MessageAckSignal {
     Identity to = 1;
     Identity from = 2;
     string message_id = 3;
     int32 method = 4;
     int64 timestamp = 5;  
     int32 status_code = 6; 
-    Peer peer = 7;
+     optional string reply_to = 7;
     int64 offset = 8;
   }
 ```
