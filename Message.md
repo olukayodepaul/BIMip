@@ -32,11 +32,6 @@ It encapsulates:
     optional int64 offset = 12;
   }
 
-message Peer {
-    string to = 1;
-    int64 peer_offset = 2;
-  }
-
  message MessageAckSignal {
     Identity to = 1;
     Identity from = 2;
