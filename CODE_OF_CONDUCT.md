@@ -1,67 +1,74 @@
+### 1. `Queue.QueueLogImpl` (The Core Sharded Engine)
 
-To monetize your application, you need to move from "I built a queue" to "I solve a multi-million dollar business problem." Large organizations do not buy code; they buy solutions to bottlenecks.
+This module acts as the primary storage controller. It manages the **Active Segment** (the file currently receiving data) and handles all I/O operations.
 
-Here is a formal breakdown of the users who would pay for your specific Cowboy + Protobuf + Sharded Persistent Queue stack and why
+* **Partitioning/Sharding:** Uses `:erlang.phash2(user, 64)` to distribute traffic across 64 individual GenServer workers. This ensures that a surge in one user's activity does not block others.
+* **Two-Stage Writing (Buffered I/O):**
+* **Stage 1:** In the `write/7` function, data is inserted into an ETS buffer (`log_buffer/1`).
+* **Stage 2:** The `perform_flush/1` function runs every 100ms, batch-writing everything from the ETS buffer to disk in a single sequential burst.
 
----
 
-
-### 1. High-Frequency Fintech (The "Market Tape" User)
-
-In financial markets, data is only valuable if it is delivered in the correct order and without duplicates.
-
-* **User:** Crypto exchanges, Retail Stock Apps, or DeFi protocol developers.
-* **The Problem:** They need to broadcast millions of price updates (ticks) per second. If a "Buy" signal is duplicated, it can cause catastrophic financial errors.
-* **Your Solution:** The `MessageTracker` ensures **Exactly-Once** delivery. The `QueueLogImpl` creates an **Immutable Audit Trail** required by regulators (SEC/FINRA).
-* **Monetization Pitch:** "A financial-grade signaling server that guarantees message integrity and sub-millisecond persistence for audit compliance."
+* **Segment Rotation:** In `rotate_segment/1`, the engine monitors file sizes. Once a log exceeds `@max_segment_size` (100MB), it closes the files and creates a new "Segment" with a unique base ID.
+* **The Reader Pool:** The `reader_fd/2` function manages a pool of open file descriptors in a cache (`:bimip_log_reader_pool`). This uses an **LRU (Least Recently Used)** eviction strategy via `evict_lru/1` to stay within the OS file limit.
+* **Binary Alignment:** The `read_from_disk/3` function implements a precise binary pattern match to extract the payload using the header size (19 bytes) plus the variable username and metadata offsets.
 
 ---
 
-### 2. Autonomous Robotics & Drones (The "Black Box" User)
+### 2. `Queue.BimipCompactor` (The Lifecycle Manager)
 
-Robots generate high-bandwidth telemetry that must be saved for post-crash analysis.
+This is a background maintenance worker that manages **Historical Segments** to ensure disk space is recycled and data integrity is maintained.
 
-* **User:** Drone fleet managers (delivery/mapping), autonomous warehouse robot manufacturers.
-* **The Problem:** Drones send "Lidar" and "Sensor" data in binary format. If a drone crashes, engineers need to "Replay" the last 10 seconds of data to find the bug.
-* **Your Solution:** Your **Append-Only Segments** act as a "Flight Recorder." Because you use Protobuf, you save 40% on cellular data costs compared to JSON.
-* **Monetization Pitch:** "Embedded-ready signaling with built-in 'Time Machine' replay for robotics telemetry."
-
----
-
-### 3. Industrial IoT / "Industry 4.0" (The "Digital Twin" User)
-
-Factories use virtual models (Digital Twins) that must stay in sync with thousands of physical sensors.
-
-* **User:** Smart factory operators (BMW, Siemens type environments), Green Energy Grid managers.
-* **The Problem:** Sensors are often "occasionally connected." When they reconnect after a signal drop, they need to catch up on every command they missed.
-* **Your Solution:** The `DeviceBookmark` remembers exactly where each sensor stopped. The Cowboy/Protobuf layer handles 100k+ connections on a single cheap server.
-* **Monetization Pitch:** "Resilient connectivity for industrial sensors that never loses a state update during network drops."
+* **Historical Analysis:** The `find_historical_segments/1` function scans the disk for `.idx` files that are not currently locked by a shard's manifest.
+* **Tail-Recursive Compaction:** The `process_idx_entries/7` function iterates through historical segments. It uses a **TTL (Time-To-Live)** check: `if ts > cutoff`. Records that pass are kept; those that fail (older than 7 days) are dropped.
+* **Atomic Swapping:** After creating a new, smaller segment, it calls `GenServer.call(worker, {:compact_swap, ...})`. This triggers the `handle_call` in `QueueLogImpl` to atomically update the index cache and delete old files.
+* **File Handle Safety:** It uses `copy_segment_with_retention/6` to open the source file once and stream data, preventing the "too many open files" error.
 
 ---
 
-### 4. Enterprise Log Aggregators (The "Data Shipper" User)
+### 3. `Queue.MessageTracker` & `Sweeper` (The Deduplication Guard)
 
-Large companies need to move logs from 10,000 servers to a central database without dropping a single line.
+This module provides "Exactly-Once" delivery semantics by preventing duplicate messages from entering the system.
 
-* **User:** Cybersecurity firms (SIEM), Cloud Infrastructure teams.
-* **The Problem:** During a DDoS attack, log volume spikes. Standard systems crash.
-* **Your Solution:** Your **64-way Sharding** prevents the "Hot Shard" problem, and **Backpressure** logic ensures your server tells the log-senders to "Slow down" instead of crashing.
-* **Monetization Pitch:** "The unbreakable log-shipping backbone for high-stress security environments."
+* **Two-Generation ETS:** `init/0` creates two sets of tables (Gen 0 and Gen 1). This allows for "Zero-Downtime" clearing of old data.
+* **High-Speed Check:** `check_and_insert/4` uses a hash of the message key to find one of **256 partitions**. It checks the old generation first, then the current one, using `:ets.insert_new/2` for lock-free performance.
+* **Persistent Term Optimization:** It stores the active generation index in `:persistent_term`. This allows every shard to know which table to write to without hitting a bottlenecked central GenServer.
+* **The Sweeper:** `Queue.MessageTracker.Sweeper` manages the clock. It triggers `rotate/0` every 12 hours, which flips the active generation and clears the old one in a throttled background task to prevent CPU spikes.
 
 ---
 
-### How to Package and Sell This
+### 4. `Queue.DeviceBookmark` (The State Tracker)
 
-| Model | Implementation | Who Buys It? |
-| --- | --- | --- |
-| **Enterprise License** | On-Premise deployment (They run it on their hardware). | Banks, Military, Gov. |
-| **Managed SaaS** | You host it; they send binary data to your endpoint. | Startups, IoT Devs. |
-| **Support Contract** | Open Source the engine, sell "24/7 Support & Tuning." | Mid-market tech firms. |
+This module acts as the "Cursor" for every connected client, tracking exactly what they have read.
 
-### Your Value Proposition Matrix
+* **Startup Recovery:** The `startup/0` function initializes **Mnesia** for disk-based persistence and then calls `load_cache_from_mnesia/2` to warm up ETS caches for instant lookup speed.
+* **Sharded Tracking:** Like the Log Engine, it shards bookmarks across 64 ETS tables to prevent lock contention when thousands of devices acknowledge messages simultaneously.
+* **Monotonic Advancement:** The `advance/4` function ensures the consumer's position never moves backward, protecting against race conditions where an older acknowledgement might arrive after a newer one.
 
-| If they use... | Your Advantage |
-| --- | --- |
-| **Redis** | "Redis is volatile. We are persistent-by-default on disk." |
-| **Kafka** | "Kafka is a nightmare to manage. We are a single, lean binary." |
-| **Pusher/Socket.io** | "Those are text-based toys. We are binary-native and sharded." |
+---
+
+### 5. `Queue.Persist` (The Data Architect)
+
+This is a pure functional module that ensures every message saved to disk follows a strict schema.
+
+* **Struct Construction:** The `build/6` function takes the raw payload and wraps it in a `%Bimip.Message{}` struct.
+* **Writer Attribution:** It explicitly assigns the `writer_device` to the struct. This is the crucial data point used by `fetch_for_device/4` in the Log Engine to filter out a device's own messages during a fetch.
+* **Uniformity:** It ensures that whether a message is a "Chat," "System," or "Command" type, it is serialized into the same binary format for the storage engine.
+
+---
+
+### 6. `Queue.Application` & `Supervisor` (The Safety Net)
+
+This module manages the system's "Tree of Life."
+
+* **Boot Sequencing:** It calls `QueueLogImpl.__startup__` and `Queue.DeviceBookmark.startup` before starting any workers. This ensures all ETS tables exist before the Shards try to use them.
+* **Granular Supervision:** Each of the 64 shards is supervised individually. If Shard 12 crashes due to a hardware I/O error, Shards 0–11 and 13–63 remain online and operational.
+
+---
+
+### Summary of Interaction
+
+1. **Ingress:** A message arrives. `MessageTracker` ensures it’s not a duplicate.
+2. **Structuring:** `Persist` creates the standardized `%Bimip.Message{}`.
+3. **Storage:** `QueueLogImpl` saves it to an **Active Segment** on disk and updates the `.idx` file.
+4. **Consumption:** A device asks for data. `DeviceBookmark` tells the system where to start reading. `QueueLogImpl` reads the segment, filtering out the message if the `writer_device` matches the caller.
+5. **Maintenance:** `BimipCompactor` merges full segments and removes expired data to keep the system lean.
