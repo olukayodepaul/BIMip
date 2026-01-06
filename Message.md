@@ -99,8 +99,7 @@ It encapsulates:
 request = %Bimip.Message{
   peer_uid: "vcNAQcDoIIB4TCCAd0CAQAxggE2MIIBMgI",
   from: %Bimip.Identity{
-    eid: "a@domain.com",
-    connection_resource_id: "J5kL7o9pQ8rT6uV5wX4yZ3aBcD1fG0hI7jK"
+    eid: "a@domain.com"
   },
   to: %Bimip.Identity{
     eid: "b@domain.com"
