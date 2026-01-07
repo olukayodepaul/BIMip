@@ -194,4 +194,3 @@ Manual verification requires explicitly providing the public key.
 * `device_id` = tracking identity
 * `uupid` = queue and routing identity
 
-This design ensures **high performance**, **fault isolation**, and **horizontal scalability**.
