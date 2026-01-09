@@ -1,5 +1,5 @@
 user = "a@domain.com"
-total_messages = 1_000_000
+total_messages = 5_000_000
 batch_size = 1_000
 
 IO.puts "🚀 Starting stress test: #{total_messages} messages..."
