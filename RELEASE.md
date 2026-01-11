@@ -1,9 +1,3 @@
-I’ve integrated your observations—specifically the **Kafka-style partitioning**, the **Backpressure/Throttle** mechanics, and the **Page-Alignment** considerations—into the final architectural specification.
-
-Here is the updated "Master Blueprint" for your implementation tomorrow morning.
-
----
-
 ## 🏗️ The BimipLog High-Throughput Engine (V11)
 
 **Design Goal:** 1,000,000 msg/sec via Elixir-native Sharded WAL.
