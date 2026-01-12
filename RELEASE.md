@@ -1,26 +1,26 @@
-## 📄 High-Performance Sharded Log Specification (V13)
+### 📑 The Final Master Specification: V14 (The "Build-Ready" Edition)
 
-### 1. The Core Strategy: Metadata-First, Deferred Block-Commits
+#### 1. The Core Strategy: Metadata-First, Block-Log Last
 
 The system treats the log as a series of **Atomic Blocks**. While physical byte offsets are calculated sequentially in RAM to update metadata, the actual `.log` disk I/O is deferred until a block is full or a timeout occurs.
 
-### 2. The Active Trigger Mechanism (Ingestion)
+#### 2. The Active Trigger Mechanism (Ingestion)
 
 Throughput is managed by the **Entry Point** rather than a polling loop:
 
 * **Volume Trigger:** The producer process increments an atomic ETS counter. Once the `@user_stride` is hit (e.g., 1,000 messages), it signals the Shard GenServer via `:force_flush`.
 * **Latency Trigger (The Drain):** A 20ms `Process.send_after` timer ensures that if a burst ends at message 1,001, the "remaining 1" is flushed immediately without waiting for a new batch.
 
-### 3. The Iteration & Flush Logic (RAM)
+#### 3. The Iteration & Flush Logic (RAM)
 
 During a flush (triggered by Volume or Time), the Shard GenServer processes the ETS buffer:
 
 * **Step A: Physical Mapping:** Calculate `current_pos = last_pos + size_of(msg_binary)`.
 * **Step B: Per-User Bookmarking:** Update the **Bin-Anchor** map for *every* user in the batch.
 * **Step C: Stride Detection:** If the message count hits `@user_stride`, generate a **Sparse Index** entry.
-* **Step D: The Remainder Sweep:** If the loop reaches the end of the ETS buffer before hitting the next stride, the "leftover" messages are still bundled into the `log_iolist`.
+* **Step D: The Remainder Sweep:** Even if the batch only has 1 message, the loop completes and bundles it into the `log_iolist`.
 
-### 4. The Commit Execution (Disk I/O)
+#### 4. The Commit Execution (Disk I/O)
 
 To saturate disk bandwidth, writes are batched:
 
@@ -55,3 +55,8 @@ To saturate disk bandwidth, writes are batched:
 3. **[ ] Block Write:** Ensure `:file.write(log_fd, iolist)` happens once at the end of the flush, regardless of whether it’s a full 1,000 or a remainder of 1.
 4. **[ ] Recovery Seek:** Implement the `init` logic to seek to the `last_physical_offset` found in the Anchor file.
 
+---
+
+### The Next Frontier: The Message Queue
+
+Once this is running, the "Message Queue" becomes a **Sequential Reader** that glides over these blocks. Because your blocks are already ordered by offset, the queue just needs to track a "Read Pointer" against your "Write Anchor."
