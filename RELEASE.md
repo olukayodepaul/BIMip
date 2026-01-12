@@ -1,46 +1,53 @@
-## 🏗️ The BimipLog High-Throughput Engine (V11)
+## 📄 High-Performance Sharded Log Specification (V12)
 
-**Design Goal:** 1,000,000 msg/sec via Elixir-native Sharded WAL.
+### 1. The Core Strategy: Metadata-First, Block-Log Last
 
-### 1. Ingestion & Throttle (Parallel)
+Instead of writing a message to the log as soon as its position is known, we **defer the log I/O** until a full logical block (Stride) is completed. However, we update the **Bookmark (Anchor)** and **Sparse Index** during the calculation to maintain a real-time map of the storage.
 
-* **Binary Pre-Packaging:** The caller (client) performs `term_to_binary` and header assembly. The Shard Actor receives a "Ready-to-Write" blob.
-* **Producer Backpressure:** If the ETS buffer size exceeds `@max_buffer_per_shard`, the system returns `{:error, :backpressure}`. This prevents RAM exhaustion during disk I/O spikes.
-* **Logical Ordering:** Parallel workers fetch the next monotonic offset via `ets.update_counter`.
+### 2. The Iteration Logic (RAM)
 
-### 2. The "Triple-Action" Batch Engine (Sequential)
+During a flush event (triggered by timer or buffer size), the Shard GenServer processes the messages in a single sequential pass:
 
-Every `flush_interval` (20ms) or when a `stride` is hit, the Shard GenServer performs a **Single-Pass Transformation**:
+* **Step A: Physical Mapping:** For every message in the batch, calculate `current_pos = last_pos + size_of(msg_binary)`.
+* **Step B: Per-User Bookmarking:** Immediately update the **Bin-Anchor** map for that specific user. This ensures that even if User 1 is at the start of a 1,000-message batch, their progress is recorded.
+* **Step C: Stride Detection:** If the message hits the `@user_stride` (e.g., every 5th or 100th message), generate an entry for the **Sparse Index Batch**.
+* **Step D: Log Buffering:** Append the binary to a RAM-resident `iolist`.
 
-1. **Head (Sparse Index):** Identifies messages hitting the `@user_stride`. Captures their `current_pos` and builds an index entry.
-2. **Body (The Log):** Accumulates all message binaries into one massive `iolist`. Calculates future byte-offsets sequentially in RAM.
-3. **Caboose (The Anchor):** Captures the metadata and physical byte-offset of the **very last** message in the batch.
+### 3. The Commit Execution (Disk I/O)
 
-### 3. The Big Bang Commit (Surgical Strike)
+Disk writes are only triggered when the **Stride is Full** or the **Flush Timer Expires**.
 
-To saturate NVMe bandwidth and minimize syscalls, the engine performs:
-
-* **Log Write:** One big push of the `iolist` body to the `.log` file.
-* **Index Write:** One push of the accumulated index entries to the `.idx` file.
-* **Anchor Update:** An atomic `:file.pwrite` of the "Caboose" data to the `Bin-Anchor` file.
+1. **Index Batch:** Write the accumulated index entries to the `.idx` file.
+2. **The Log Block:** Perform **one** `:file.write` for the entire `iolist` accumulated during the stride.
+3. **The Anchor Sync:** Atomic update to the `Bin-Anchor` file to "seal" the physical offset.
 
 ---
 
-## 🛠️ Performance & Durability Policy
+### 4. Crash Recovery & Persistence
 
-* **Page Alignment:** We aim for batch sizes that are multiples of 4KB to align with SSD hardware pages, reducing "Write Amplification."
-* **Isolation:** Each shard owns its own File Descriptors (FDs). There is **zero lock contention** between Shard 0 and Shard 63.
-* **Fsync Policy:** Following the Kafka model, we rely on the OS Page Cache for performance, but the **Bin-Anchor** ensures that even in a crash, we know exactly where the "Known Good" data ends.
+The system is designed to be **self-healing** without requiring a full log scan.
+
+* **The Anchor as Truth:** On startup, the GenServer reads the `Bin-Anchor`. It retrieves the `last_physical_offset` that was successfully committed.
+* **Seek & Resume:** The file descriptor is moved to that exact byte via `:file.position(fd, last_offset)`.
+* **Truncation Guard:** Any data existing in the file *after* the `last_offset` (remnants of a partial write during a crash) is ignored or truncated. This ensures the log starts from a known-good, deterministic state.
 
 ---
 
-## 🏁 Morning Implementation Steps
+### 5. Implementation Constants (Suggested)
 
-1. **Refactor `perform_flush`:** Remove all `:file.write` calls from inside the loop.
-2. **Accumulator:** Use `Enum.reduce` to return `{log_batch, index_batch, last_item, final_pos}`.
-3. **Sequential Write:** Call `:file.write` twice (Log, then Index) and `:file.pwrite` once (Anchor).
-4. **Recovery:** Update `init` to seek to the `last_physical_offset` found in the Anchor.
+| Constant | Value | Purpose |
+| --- | --- | --- |
+| `@user_stride` | `5` to `100` | Balancing lookup speed vs. index file size. |
+| `@flush_interval` | `20ms` | Maximum latency a message waits before being forced to disk. |
+| `@max_batch_size` | `1,000` | Maximum messages to group into a single Log Block. |
 
-This design is now rock solid. You have the speed of a batch-writer with the precision of a single-record log.
+---
 
-**I'm ready when you are. Would you like me to hold this blueprint for you to reference when you start coding in the morning?**
+### 🚀 Morning Coding Checklist
+
+1. **[ ]** Refactor `perform_flush` to use an `Enum.reduce` that builds `log_iolist` and `index_iolist` while updating a user-map.
+2. **[ ]** Ensure the `:file.write` for the log happens **outside** the loop, only when the stride/batch is complete.
+3. **[ ]** Implement the `init` recovery that reads the `Bin-Anchor` and performs the initial `:file.position`.
+4. **[ ]** Verify that the `Bin-Anchor` is updated with the **very last** calculated offset of the batch.
+
+**Documentation complete. The architecture is locked. Would you like me to generate a skeleton Elixir module based on this documentation to give you a head start in the morning?**
