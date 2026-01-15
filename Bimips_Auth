@@ -1,5 +1,5 @@
-user = "a@domain.com"
-total_messages = 5_000
+user = "b@domain.com"
+total_messages = 500
 batch_size = 1_000
 
 IO.puts "🚀 Starting stress test: #{total_messages} messages..."
@@ -150,3 +150,53 @@ When a device asks for messages:
 To follow this to the letter, we need to ensure the **Memory Buffer** correctly calculates the offset before the write happens.
 
 **Would you like to write the Elixir function that calculates the `physical_offset` based on the current file size plus the memory buffer size?**
+
+
+
+
+
+
+
+user1 = "user1@domain.com"
+user2 = "user57@domain.com"  # same shard 18
+
+total_messages = 500
+batch_size = 1_000
+
+Enum.each(1..total_messages, fn i ->
+  unique_id = :crypto.strong_rand_bytes(16) |> Base.encode64()
+  
+  msg1 = %Chat.MessageStruct{
+    peer_uid: unique_id,
+    timestamp: System.system_time(:millisecond),
+    payload: "Message ##{i} for user1",
+    payload_context: 1,
+    encryption_type: "E2E",
+    encrypted: "DATA_#{i}",
+    signature: "SIG_#{i}",
+    device_id: "aaaaa1",
+    uupid: "1",
+    eid: user1,
+    from: %Chat.EntityStruct{eid: user1, connection_resource_id: "aaaaa1"},
+    to: %Chat.EntityStruct{eid: user2, connection_resource_id: nil}
+  }
+
+  msg2 = %Chat.MessageStruct{
+    peer_uid: unique_id,
+    timestamp: System.system_time(:millisecond),
+    payload: "Message ##{i} for user2",
+    payload_context: 1,
+    encryption_type: "E2E",
+    encrypted: "DATA_#{i}",
+    signature: "SIG_#{i}",
+    device_id: "bbbb1",
+    uupid: "1",
+    eid: user2,
+    from: %Chat.EntityStruct{eid: user2, connection_resource_id: "bbbb1"},
+    to: %Chat.EntityStruct{eid: user1, connection_resource_id: nil}
+  }
+
+  # Write both to same shard 18
+  Queue.QueueLogImpl.write(1, user1, user1, "1", 1, 1, msg1, unique_id)
+  Queue.QueueLogImpl.write(1, user2, user2, "1", 1, 1, msg2, unique_id)
+end)
