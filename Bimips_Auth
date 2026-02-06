@@ -197,6 +197,6 @@ Enum.each(1..total_messages, fn i ->
   }
 
   # Write both to same shard 18
-  Queue.QueueLogImpl.write(1, user1, user1, "1", 1, 1, msg1, unique_id)
-  Queue.QueueLogImpl.write(1, user2, user2, "1", 1, 1, msg2, unique_id)
+  Queue.QueueLogImpl.write(1, user1, user1, "1", 1, 1, msg1, unique_id, System.system_time(:millisecond))
+  Queue.QueueLogImpl.write(1, user2, user2, "1", 1, 1, msg2, unique_id, System.system_time(:millisecond))
 end)
