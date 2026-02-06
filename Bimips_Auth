@@ -200,3 +200,419 @@ Enum.each(1..total_messages, fn i ->
   Queue.QueueLogImpl.write(1, user1, user1, "1", 1, 1, msg1, unique_id, System.system_time(:millisecond))
   Queue.QueueLogImpl.write(1, user2, user2, "1", 1, 1, msg2, unique_id, System.system_time(:millisecond))
 end)
+
+
+📄 FILE: 37_11_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user30@domain.com         |           3 |            11 |       3
+   #2 | user57@domain.com         |           6 |            12 |       6
+   #3 | user30@domain.com         |           4 |            13 |       4
+   #4 | user1@domain.com          |           4 |            14 |       4
+   #5 | user30@domain.com         |           5 |            15 |       5
+   #6 | user30@domain.com         |           6 |            16 |       6
+   #7 | user57@domain.com         |           7 |            17 |       7
+   #8 | user30@domain.com         |           7 |            18 |       7
+   #9 | user57@domain.com         |           8 |            19 |       8
+  #10 | user30@domain.com         |           8 |            20 |       8
+🏁 End of file.
+
+📄 FILE: 37_1_1770405292.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user57@domain.com         |           1 |             1 |       1
+   #2 | user57@domain.com         |           2 |             2 |       2
+   #3 | user57@domain.com         |           3 |             3 |       3
+   #4 | user1@domain.com          |           1 |             4 |       1
+   #5 | user1@domain.com          |           2 |             5 |       2
+   #6 | user30@domain.com         |           1 |             6 |       1
+   #7 | user57@domain.com         |           4 |             7 |       4
+   #8 | user57@domain.com         |           5 |             8 |       5
+   #9 | user1@domain.com          |           3 |             9 |       3
+  #10 | user30@domain.com         |           2 |            10 |       2
+🏁 End of file.
+
+📄 FILE: 37_21_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user1@domain.com          |           5 |            21 |       5
+   #2 | user30@domain.com         |           9 |            22 |       9
+   #3 | user57@domain.com         |           9 |            23 |       9
+   #4 | user30@domain.com         |          10 |            24 |      10
+   #5 | user30@domain.com         |          11 |            25 |      11
+   #6 | user1@domain.com          |           6 |            26 |       6
+   #7 | user1@domain.com          |           7 |            27 |       7
+   #8 | user30@domain.com         |          12 |            28 |      12
+   #9 | user57@domain.com         |          10 |            29 |      10
+  #10 | user1@domain.com          |           8 |            30 |       8
+🏁 End of file.
+
+📄 FILE: 37_31_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user30@domain.com         |          13 |            31 |      13
+   #2 | user57@domain.com         |          11 |            32 |      11
+   #3 | user30@domain.com         |          14 |            33 |      14
+   #4 | user1@domain.com          |           9 |            34 |       9
+   #5 | user30@domain.com         |          15 |            35 |      15
+   #6 | user57@domain.com         |          12 |            36 |      12
+   #7 | user57@domain.com         |          13 |            37 |      13
+🏁 End of file.
+:ok
+
+
+
+[
+  {"user30@domain.com",
+   %{
+     "__anchor__" => {"31_1770405357", 15},
+     "positions" => %{
+       "11_1770405357" => 3,
+       "1_1770405292" => 1,
+       "21_1770405357" => 9,
+       "31_1770405357" => 13
+     }
+   }},
+  {"user1@domain.com",
+   %{
+     "__anchor__" => {"31_1770405357", 9},
+     "positions" => %{
+       "11_1770405357" => 4,
+       "1_1770405292" => 1,
+       "21_1770405357" => 5,
+       "31_1770405357" => 9
+     }
+   }},
+  {"user57@domain.com",
+   %{
+     "__anchor__" => {"31_1770405357", 13},
+     "positions" => %{
+       "11_1770405357" => 6,
+       "1_1770405292" => 1,
+       "21_1770405357" => 9,
+       "31_1770405357" => 11
+     }
+   }}
+]
+
+
+==================================================
+📂 RAW BINARY DUMP: SHARD 37
+==================================================
+
+👤 User: user1@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"31_1770405357", 9},
+  "positions" => %{
+    "11_1770405357" => 4,
+    "1_1770405292" => 1,
+    "21_1770405357" => 5,
+    "31_1770405357" => 9
+  }
+}
+------------------------------------------------
+
+👤 User: user30@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"31_1770405357", 15},
+  "positions" => %{
+    "11_1770405357" => 3,
+    "1_1770405292" => 1,
+    "21_1770405357" => 9,
+    "31_1770405357" => 13
+  }
+}
+------------------------------------------------
+
+👤 User: user57@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"31_1770405357", 13},
+  "positions" => %{
+    "11_1770405357" => 6,
+    "1_1770405292" => 1,
+    "21_1770405357" => 9,
+    "31_1770405357" => 11
+  }
+}
+------------------------------------------------
+
+
+
+20:21:27.215 [debug] Shard 33 marked idle. Next flush scheduled.
+================================================
+📜 SHARD 37 MANIFEST SUMMARY
+================================================
+🎯 ACTIVE SEGMENT:
+   Base Offset:     31
+   Global Offset:   37
+   Msg in Segment:  7
+   Physical Pos:    2539 bytes 📍
+   Avg Msg Size:    362.71 bytes
+   File TS:         1770405357
+------------------------------------------------
+📂 EXPIRED SEGMENTS:
+   • Segment: 37_11_1770405357 | Rotated At: 1770405357
+   • Segment: 37_1_1770405292 | Rotated At: 1770405357
+   • Segment: 37_21_1770405357 | Rotated At: 1770405357
+================================================
+:ok
+
+
+...(22)> end)
+------------------------------------------------
+📂 FILE: 37_11_1770405357.idx
+📍 [user30@domain.com] Offset: 3 | Seg: 11 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 6 | Seg: 11 | Pos: 360 bytes
+📍 [user1@domain.com] Offset: 4 | Seg: 11 | Pos: 1080 bytes
+📍 [user30@domain.com] Offset: 5 | Seg: 11 | Pos: 1441 bytes
+📍 [user30@domain.com] Offset: 7 | Seg: 11 | Pos: 2524 bytes
+📍 [user57@domain.com] Offset: 8 | Seg: 11 | Pos: 2886 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_1_1770405292.idx
+📍 [user57@domain.com] Offset: 1 | Seg: 1 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 3 | Seg: 1 | Pos: 715 bytes
+📍 [user1@domain.com] Offset: 1 | Seg: 1 | Pos: 1075 bytes
+📍 [user30@domain.com] Offset: 1 | Seg: 1 | Pos: 1793 bytes
+📍 [user57@domain.com] Offset: 5 | Seg: 1 | Pos: 2512 bytes
+📍 [user1@domain.com] Offset: 3 | Seg: 1 | Pos: 2872 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_21_1770405357.idx
+📍 [user1@domain.com] Offset: 5 | Seg: 21 | Pos: 0 bytes
+📍 [user30@domain.com] Offset: 9 | Seg: 21 | Pos: 361 bytes
+📍 [user57@domain.com] Offset: 9 | Seg: 21 | Pos: 720 bytes
+📍 [user30@domain.com] Offset: 11 | Seg: 21 | Pos: 1441 bytes
+📍 [user1@domain.com] Offset: 7 | Seg: 21 | Pos: 2164 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_31_1770405357.idx
+📍 [user30@domain.com] Offset: 13 | Seg: 31 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 11 | Seg: 31 | Pos: 362 bytes
+📍 [user1@domain.com] Offset: 9 | Seg: 31 | Pos: 1088 bytes
+📍 [user30@domain.com] Offset: 15 | Seg: 31 | Pos: 1449 bytes
+📍 [user57@domain.com] Offset: 13 | Seg: 31 | Pos: 2175 bytes
+🏁 End of file reached.
+
+
+
+
+............
+
+📄 FILE: 37_11_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user30@domain.com         |           3 |            11 |       3
+   #2 | user57@domain.com         |           6 |            12 |       6
+   #3 | user30@domain.com         |           4 |            13 |       4
+   #4 | user1@domain.com          |           4 |            14 |       4
+   #5 | user30@domain.com         |           5 |            15 |       5
+   #6 | user30@domain.com         |           6 |            16 |       6
+   #7 | user57@domain.com         |           7 |            17 |       7
+   #8 | user30@domain.com         |           7 |            18 |       7
+   #9 | user57@domain.com         |           8 |            19 |       8
+  #10 | user30@domain.com         |           8 |            20 |       8
+🏁 End of file.
+
+📄 FILE: 37_1_1770405292.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user57@domain.com         |           1 |             1 |       1
+   #2 | user57@domain.com         |           2 |             2 |       2
+   #3 | user57@domain.com         |           3 |             3 |       3
+   #4 | user1@domain.com          |           1 |             4 |       1
+   #5 | user1@domain.com          |           2 |             5 |       2
+   #6 | user30@domain.com         |           1 |             6 |       1
+   #7 | user57@domain.com         |           4 |             7 |       4
+   #8 | user57@domain.com         |           5 |             8 |       5
+   #9 | user1@domain.com          |           3 |             9 |       3
+  #10 | user30@domain.com         |           2 |            10 |       2
+🏁 End of file.
+
+📄 FILE: 37_21_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user1@domain.com          |           5 |            21 |       5
+   #2 | user30@domain.com         |           9 |            22 |       9
+   #3 | user57@domain.com         |           9 |            23 |       9
+   #4 | user30@domain.com         |          10 |            24 |      10
+   #5 | user30@domain.com         |          11 |            25 |      11
+   #6 | user1@domain.com          |           6 |            26 |       6
+   #7 | user1@domain.com          |           7 |            27 |       7
+   #8 | user30@domain.com         |          12 |            28 |      12
+   #9 | user57@domain.com         |          10 |            29 |      10
+  #10 | user1@domain.com          |           8 |            30 |       8
+🏁 End of file.
+
+📄 FILE: 37_31_1770405357.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user30@domain.com         |          13 |            31 |      13
+   #2 | user57@domain.com         |          11 |            32 |      11
+   #3 | user30@domain.com         |          14 |            33 |      14
+   #4 | user1@domain.com          |           9 |            34 |       9
+   #5 | user30@domain.com         |          15 |            35 |      15
+   #6 | user57@domain.com         |          12 |            36 |      12
+   #7 | user57@domain.com         |          13 |            37 |      13
+   #8 | user57@domain.com         |          14 |            38 |      14
+   #9 | user1@domain.com          |          10 |            39 |      10
+  #10 | user30@domain.com         |          16 |            40 |      16
+🏁 End of file.
+
+📄 FILE: 37_41_1770405843.log
+ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
+-------------------------------------------------------------------------------------
+   #1 | user57@domain.com         |          15 |            41 |      15
+   #2 | user1@domain.com          |          11 |            42 |      11
+🏁 End of file.
+:ok
+
+
+[
+  {"user30@domain.com",
+   %{
+     "__anchor__" => {"31_1770405357", 16},
+     "positions" => %{
+       "11_1770405357" => 3,
+       "1_1770405292" => 1,
+       "21_1770405357" => 9,
+       "31_1770405357" => 13
+     }
+   }},
+  {"user1@domain.com",
+   %{
+     "__anchor__" => {"41_1770405843", 11},
+     "positions" => %{
+       "11_1770405357" => 4,
+       "1_1770405292" => 1,
+       "21_1770405357" => 5,
+       "31_1770405357" => 9,
+       "41_1770405843" => 11
+     }
+   }},
+  {"user57@domain.com",
+   %{
+     "__anchor__" => {"41_1770405843", 15},
+     "positions" => %{
+       "11_1770405357" => 6,
+       "1_1770405292" => 1,
+       "21_1770405357" => 9,
+       "31_1770405357" => 11,
+       "41_1770405843" => 15
+     }
+   }}
+]
+
+
+==================================================
+📂 RAW BINARY DUMP: SHARD 37
+==================================================
+
+👤 User: user1@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"41_1770405843", 11},
+  "positions" => %{
+    "11_1770405357" => 4,
+    "1_1770405292" => 1,
+    "21_1770405357" => 5,
+    "31_1770405357" => 9,
+    "41_1770405843" => 11
+  }
+}
+------------------------------------------------
+
+👤 User: user30@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"31_1770405357", 16},
+  "positions" => %{
+    "11_1770405357" => 3,
+    "1_1770405292" => 1,
+    "21_1770405357" => 9,
+    "31_1770405357" => 13
+  }
+}
+------------------------------------------------
+
+👤 User: user57@domain.com
+📦 Raw Map Data:
+   Content: %{
+  "__anchor__" => {"41_1770405843", 15},
+  "positions" => %{
+    "11_1770405357" => 6,
+    "1_1770405292" => 1,
+    "21_1770405357" => 9,
+    "31_1770405357" => 11,
+    "41_1770405843" => 15
+  }
+}
+
+
+================================================
+📜 SHARD 37 MANIFEST SUMMARY
+================================================
+🎯 ACTIVE SEGMENT:
+   Base Offset:     41
+   Global Offset:   42
+   Msg in Segment:  2
+   Physical Pos:    724 bytes 📍
+   Avg Msg Size:    362.0 bytes
+   File TS:         1770405843
+------------------------------------------------
+📂 EXPIRED SEGMENTS:
+   • Segment: 37_11_1770405357 | Rotated At: 1770405357
+   • Segment: 37_1_1770405292 | Rotated At: 1770405357
+   • Segment: 37_21_1770405357 | Rotated At: 1770405357
+   • Segment: 37_31_1770405357 | Rotated At: 1770405843
+================================================
+:ok
+
+
+------------------------------------------------
+📂 FILE: 37_11_1770405357.idx
+📍 [user30@domain.com] Offset: 3 | Seg: 11 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 6 | Seg: 11 | Pos: 360 bytes
+📍 [user1@domain.com] Offset: 4 | Seg: 11 | Pos: 1080 bytes
+📍 [user30@domain.com] Offset: 5 | Seg: 11 | Pos: 1441 bytes
+📍 [user30@domain.com] Offset: 7 | Seg: 11 | Pos: 2524 bytes
+📍 [user57@domain.com] Offset: 8 | Seg: 11 | Pos: 2886 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_1_1770405292.idx
+📍 [user57@domain.com] Offset: 1 | Seg: 1 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 3 | Seg: 1 | Pos: 715 bytes
+📍 [user1@domain.com] Offset: 1 | Seg: 1 | Pos: 1075 bytes
+📍 [user30@domain.com] Offset: 1 | Seg: 1 | Pos: 1793 bytes
+📍 [user57@domain.com] Offset: 5 | Seg: 1 | Pos: 2512 bytes
+📍 [user1@domain.com] Offset: 3 | Seg: 1 | Pos: 2872 bytes
+🏁 End of file reached.
+------------------------------------------------
+
+20:28:15.555 [info] [MessageTracker] SHARD 8 Rotated.
+📂 FILE: 37_21_1770405357.idx
+📍 [user1@domain.com] Offset: 5 | Seg: 21 | Pos: 0 bytes
+📍 [user30@domain.com] Offset: 9 | Seg: 21 | Pos: 361 bytes
+📍 [user57@domain.com] Offset: 9 | Seg: 21 | Pos: 720 bytes
+📍 [user30@domain.com] Offset: 11 | Seg: 21 | Pos: 1441 bytes
+📍 [user1@domain.com] Offset: 7 | Seg: 21 | Pos: 2164 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_31_1770405357.idx
+📍 [user30@domain.com] Offset: 13 | Seg: 31 | Pos: 0 bytes
+📍 [user57@domain.com] Offset: 11 | Seg: 31 | Pos: 362 bytes
+📍 [user1@domain.com] Offset: 9 | Seg: 31 | Pos: 1088 bytes
+📍 [user30@domain.com] Offset: 15 | Seg: 31 | Pos: 1449 bytes
+📍 [user57@domain.com] Offset: 13 | Seg: 31 | Pos: 2175 bytes
+📍 [user57@domain.com] Offset: 14 | Seg: 31 | Pos: 2539 bytes
+📍 [user1@domain.com] Offset: 10 | Seg: 31 | Pos: 2900 bytes
+📍 [user30@domain.com] Offset: 16 | Seg: 31 | Pos: 3261 bytes
+🏁 End of file reached.
+------------------------------------------------
+📂 FILE: 37_41_1770405843.idx
+📍 [user57@domain.com] Offset: 15 | Seg: 41 | Pos: 0 bytes
+📍 [user1@domain.com] Offset: 11 | Seg: 41 | Pos: 362 bytes
+🏁 End of file reached.
