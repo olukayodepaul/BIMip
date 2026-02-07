@@ -202,6 +202,75 @@ Enum.each(1..total_messages, fn i ->
 end)
 
 
+
+This is a much safer and more robust architecture. By moving to an **Explicit Ack** model, you have moved from "At-Most-Once" to **"At-Least-Once" delivery**.
+
+If the server crashes *after* sending data but *before* receiving the Ack, the device will simply request the same data again upon reconnection. This is the gold standard for reliable signal delivery.
+
+---
+
+### The Refined Explicit Ack Flow
+
+#### 1. The Discovery (New Device)
+
+* **Trigger:** A `fetch` request arrives from a `device_id` not found in the cache.
+* **Action:** The server looks at the `positions` map (the history book).
+* **Result:** It identifies the oldest available `segment_id`.
+* **The Start:** The server treats the device as starting at `{oldest_segment_id, 0}` for this specific read.
+* **Crucial Note:** As you requested, **no update** happens to the `.bin` bookmark yet.
+
+#### 2. The Delivery (The Fetch)
+
+* **Action:** The server streams the batch from disk and sends it to the device.
+* **Server State:** The server remains "stateless" regarding the device's progress at this moment. It doesn't assume the device received the messages.
+
+#### 3. The Handshake (The Ack)
+
+* **Trigger:** The device receives the messages and sends an `ack(last_seen_offset)`.
+* **Verification:** The server receives the offset (e.g., `1250`).
+* **Segment Lookup:** The server scans the `positions` map in the `.bin` cache to see which segment covers offset `1250`.
+* *Example:* If `positions` shows Segment A starts at `1` and Segment B starts at `1001`, the server knows `1250` belongs to **Segment B**.
+
+
+
+#### 4. The Record (The Commit)
+
+* **Action:** The server now updates the bookmark: `device_id => {Segment_B, 1250}`.
+* **Persistence:** This is stored in the ETS cache and eventually snapshotted to the `.bin` file.
+
+#### 5. The Resume (Next Fetch)
+
+* **Action:** On the next request, the server pulls `{Segment_B, 1250}` directly.
+* **Speed:** It uses the **Sparse Index** for Segment B to jump straight to the data, skipping all search logic.
+
+---
+
+### Why the "Positions Lookup" during Ack is Brilliant
+
+By resolving the `segment_id` during the **Ack phase** instead of the **Fetch phase**, you handle segment rotations perfectly. If a user was reading the end of Segment A and the Ack offset crosses into Segment B, your lookup ensures the *next* fetch starts in the correct new file immediately.
+
+### Implementation Tip: The "Binary Search" on Positions
+
+Since your `positions` map stores `{ "base_offset_timestamp" => first_offset }`, when you get an Ack for offset `X`, you want the segment where `base_offset <= X`.
+
+```elixir
+def find_segment_for_offset(positions, ack_offset, active_base) do
+  # We want the largest base_id that is still less than or equal to the ack_offset
+  positions
+  |> Enum.map(fn {seg_key, _} -> 
+       [base_str | _] = String.split(seg_key, "_")
+       String.to_integer(base_str)
+     end)
+  |> Enum.filter(fn base_id -> base_id <= ack_offset end)
+  |> Enum.max(fn -> active_base end) 
+end
+
+```
+
+**Would you like me to show you how to structure the `handle_cast({:ack, ...})` to ensure the `.bin` cache is updated safely without blocking other writes?**
+
+
+
 📄 FILE: 37_11_1770405357.log
 ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
 -------------------------------------------------------------------------------------
