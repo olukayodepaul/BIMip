@@ -203,73 +203,94 @@ end)
 
 
 
-This is a much safer and more robust architecture. By moving to an **Explicit Ack** model, you have moved from "At-Most-Once" to **"At-Least-Once" delivery**.
+Integrating the **Daily Reconciliation** and **Ghost Pointer Purge** into your architecture provides a self-cleaning mechanism that keeps the system lean and prevents devices from getting "stuck" in the past.
 
-If the server crashes *after* sending data but *before* receiving the Ack, the device will simply request the same data again upon reconnection. This is the gold standard for reliable signal delivery.
+Here is the complete, refined flow for your **Explicit Ack & Self-Healing Architecture**:
 
 ---
 
-### The Refined Explicit Ack Flow
+### The Refined Explicit Ack & Reconciliation Flow
 
 #### 1. The Discovery (New Device)
 
 * **Trigger:** A `fetch` request arrives from a `device_id` not found in the cache.
 * **Action:** The server looks at the `positions` map (the history book).
-* **Result:** It identifies the oldest available `segment_id`.
-* **The Start:** The server treats the device as starting at `{oldest_segment_id, 0}` for this specific read.
-* **Crucial Note:** As you requested, **no update** happens to the `.bin` bookmark yet.
+* **Result:** It identifies the oldest available **non-expired** `segment_id`.
+* **The Start:** The server treats the device as starting at `{oldest_segment_id, 0}` for this read.
+* **Note:** No update happens to the `.bin` bookmark yet.
 
-#### 2. The Delivery (The Fetch)
+#### 2. The Daily Reconciliation (`exp` Check)
 
-* **Action:** The server streams the batch from disk and sends it to the device.
-* **Server State:** The server remains "stateless" regarding the device's progress at this moment. It doesn't assume the device received the messages.
-
-#### 3. The Handshake (The Ack)
-
-* **Trigger:** The device receives the messages and sends an `ack(last_seen_offset)`.
-* **Verification:** The server receives the offset (e.g., `1250`).
-* **Segment Lookup:** The server scans the `positions` map in the `.bin` cache to see which segment covers offset `1250`.
-* *Example:* If `positions` shows Segment A starts at `1` and Segment B starts at `1001`, the server knows `1250` belongs to **Segment B**.
+* **Trigger:** The first `fetch` request of the day from **any** device for a specific user.
+* **Action:** The server checks if `user_data["exp"]["last_check_date"] < today`. If so, it performs "Housekeeping":
+* **Prune Positions:** It compares the user's `positions` map against the Shard Manifest's `EXPIRED SEGMENTS` list. It removes any segment keys that have expired.
+* **Purge Ghost Pointers:** It checks all existing `device_id` records. If a device is pointing to a `segment_id` that is now in the `expired` list, that **device record is deleted**.
+* **Mark Attended:** It updates `exp` to `{"last_check_date" => today, "status" => :attended}`.
 
 
 
-#### 4. The Record (The Commit)
+#### 3. The Delivery (The Fetch)
 
-* **Action:** The server now updates the bookmark: `device_id => {Segment_B, 1250}`.
-* **Persistence:** This is stored in the ETS cache and eventually snapshotted to the `.bin` file.
+* **Action:** The server streams the batch from disk using the **Sparse Index** to jump to the physical location.
+* **Server State:** The server remains "stateless" regarding progress; it does not assume delivery yet.
 
-#### 5. The Resume (Next Fetch)
+#### 4. The Handshake (The Ack)
 
-* **Action:** On the next request, the server pulls `{Segment_B, 1250}` directly.
-* **Speed:** It uses the **Sparse Index** for Segment B to jump straight to the data, skipping all search logic.
+* **Trigger:** The device receives messages and sends `ack(last_seen_offset)`.
+* **Verification:** The server receives the offset.
+* **Segment Resolution:** The server scans the **pruned** `positions` map to find which segment covers that offset.
+* *Example:* If `positions` has `{"21_..." => 9}` and `{"31_..." => 13}`, and the Ack is for `offset 10`, it resolves to **Segment 21**.
+
+
+
+#### 5. The Record (The Commit)
+
+* **Action:** The server updates/re-creates the bookmark: `device_id => {resolved_segment_id, ack_offset}`.
+* **Persistence:** This is stored in the ETS cache and snapshotted to the `.bin` file during the next flush.
+
+#### 6. The Resume (Next Fetch)
+
+* **Action:** On the next request, the server pulls `{segment_id, last_offset}` directly.
+* **Speed:** It jumps straight to the data, bypassing all search logic.
 
 ---
 
-### Why the "Positions Lookup" during Ack is Brilliant
+### Why the "Purge" is Critical for Recovery
 
-By resolving the `segment_id` during the **Ack phase** instead of the **Fetch phase**, you handle segment rotations perfectly. If a user was reading the end of Segment A and the Ack offset crosses into Segment B, your lookup ensures the *next* fetch starts in the correct new file immediately.
+By deleting the device record when its segment expires, you solve the **"Stale Device"** problem. If a device was pointing to `Segment 1` and that segment is now gone:
 
-### Implementation Tip: The "Binary Search" on Positions
+1. The **Daily Reconciliation** deletes the `device_id` entry.
+2. On its next connection, the device is treated as **New** (Step 1).
+3. It automatically jumps to the **oldest active data** (Step 2/3).
+This ensures your system never crashes trying to find files that the compactor has already moved or deleted.
 
-Since your `positions` map stores `{ "base_offset_timestamp" => first_offset }`, when you get an Ack for offset `X`, you want the segment where `base_offset <= X`.
+### Implementation: The Pruning Logic
 
 ```elixir
-def find_segment_for_offset(positions, ack_offset, active_base) do
-  # We want the largest base_id that is still less than or equal to the ack_offset
-  positions
-  |> Enum.map(fn {seg_key, _} -> 
-       [base_str | _] = String.split(seg_key, "_")
-       String.to_integer(base_str)
-     end)
-  |> Enum.filter(fn base_id -> base_id <= ack_offset end)
-  |> Enum.max(fn -> active_base end) 
+def reconcile_user_data(user_data, expired_segments, active_base) do
+  # 1. Prune Positions
+  clean_positions = Map.filter(user_data["positions"], fn {seg_key, _} -> 
+    !Enum.member?(expired_segments, seg_key)
+  end)
+
+  # 2. Purge Ghost Pointers (Delete devices pointing to expired segments)
+  updated_data = Enum.reduce(user_data, %{}, fn 
+    {key, {seg_id, _off}}, acc when is_binary(key) ->
+      if Enum.member?(expired_segments, seg_id) do
+        acc # Skip/Delete the device
+      else
+        Map.put(acc, key, {seg_id, _off})
+      end
+    {key, val}, acc -> Map.put(acc, key, val)
+  end)
+
+  # 3. Update with cleaned positions
+  Map.put(updated_data, "positions", clean_positions)
 end
 
 ```
 
-**Would you like me to show you how to structure the `handle_cast({:ack, ...})` to ensure the `.bin` cache is updated safely without blocking other writes?**
-
-
+**Since we've finalized this "Purge & Promote" logic, would you like me to create the final state machine diagram that shows how a message travels from the Log to a Device and finally to a Permanent Bookmark?**
 
 📄 FILE: 37_11_1770405357.log
 ORDER | USER                      | BIN_HDR_OFF | SHARD_OFFSET  | OFFSET
